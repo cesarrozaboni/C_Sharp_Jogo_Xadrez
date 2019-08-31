@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Tabuleiro;
 
 namespace Jogo_Xadrez
 {
@@ -10,6 +7,9 @@ namespace Jogo_Xadrez
     {
         static void Main(string[] args)
         {
+            var p = new Posicao (3, 4);
+            Console.WriteLine(p);
+            Console.ReadKey();
         }
     }
 }
