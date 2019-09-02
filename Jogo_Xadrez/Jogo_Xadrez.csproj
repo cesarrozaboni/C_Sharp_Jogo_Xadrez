@@ -50,6 +50,7 @@
     <Compile Include="tabuleiro\Tabuleiro.cs" />
     <Compile Include="tabuleiro\TabuleiroException.cs" />
     <Compile Include="Tela.cs" />
+    <Compile Include="Xadrez\PosicaoXadrez.cs" />
     <Compile Include="Xadrez\Rei.cs" />
     <Compile Include="Xadrez\Torre.cs" />
   </ItemGroup>

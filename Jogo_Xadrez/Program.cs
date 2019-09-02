@@ -10,6 +10,11 @@ namespace Jogo_Xadrez
         {
             try
             {
+                PosicaoXadrez pos = new PosicaoXadrez('c', 7);
+                Console.WriteLine(pos);
+                Console.WriteLine(pos.toPosicao());
+                Console.ReadKey();
+
                 var p = new Posicao(3, 4);
                 Console.WriteLine(p);
                 Console.ReadKey();
