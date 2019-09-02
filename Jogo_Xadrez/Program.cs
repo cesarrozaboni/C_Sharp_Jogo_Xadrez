@@ -12,6 +12,9 @@ namespace Jogo_Xadrez
             Console.ReadKey();
 
             Tabuleiro tab = new Tabuleiro(8, 8);
+            var tela = new Tela();
+            tela.imprimirTabuleiro(tab);
+            Console.ReadKey();
         }
     }
 }
