@@ -40,7 +40,6 @@ namespace Jogo_Xadrez
                         Console.ReadKey();
                     }
                 }
-
             }
             catch (Exception e)
             {

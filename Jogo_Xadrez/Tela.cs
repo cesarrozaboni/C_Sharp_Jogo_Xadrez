@@ -51,9 +51,21 @@ namespace Jogo_Xadrez
         public static PosicaoXadrez lerPosicaoXadrez()
         {
             string s = Console.ReadLine();
-            char coluna = s[0];
-            int linha = int.Parse(s[1] + "");
-            return new PosicaoXadrez(coluna, linha);
+            if(s.Length < 2)
+            {
+                throw new TabuleiroException("Posição Invalida");
+            }
+            var aux = s.Substring(0, 1);
+            if (aux.Contains("a") || aux.Contains("b") || aux.Contains("c") || aux.Contains("d") || aux.Contains("e") || aux.Contains("f") || aux.Contains("g") || aux.Contains("h"))
+            {
+                char coluna = s[0];
+                int linha = int.Parse(s[1] + "");
+                return new PosicaoXadrez(coluna, linha);
+            }
+            else
+            {
+                throw new TabuleiroException("Posicao Invalida");
+            }
         }
 
         public static void imprimirPartida(PartidaDeXadrez partida)
@@ -65,11 +77,19 @@ namespace Jogo_Xadrez
 
             Console.WriteLine();
             Console.WriteLine("Turno: " + partida.turno);
-            Console.WriteLine("Agurdando Jogada: " + partida.JogadorAtual);
-
-            if (partida.xeque)
+            if (!partida.terminada)
             {
-                Console.WriteLine("Xeque!");
+                Console.WriteLine("Agurdando Jogada: " + partida.JogadorAtual);
+
+                if (partida.xeque)
+                {
+                    Console.WriteLine("Xeque!");
+                }
+            }
+            else
+            {
+                Console.WriteLine("XEQUEMATE!");
+                Console.WriteLine("Vencedor: " + partida.JogadorAtual);
             }
         }
 
@@ -90,7 +110,7 @@ namespace Jogo_Xadrez
         public static void imprimirConjunto(HashSet<Peca> conjunto)
         {
             Console.Write("[");
-            foreach (Peca x  in conjunto)
+            foreach (Peca x in conjunto)
             {
                 Console.Write(x + " ");
             }
