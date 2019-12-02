@@ -40,6 +40,8 @@ namespace Jogo_Xadrez
                         Console.ReadKey();
                     }
                 }
+                Console.Clear();
+                Tela.imprimirPartida(partida);
             }
             catch (Exception e)
             {

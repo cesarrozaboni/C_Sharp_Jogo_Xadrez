@@ -73,8 +73,6 @@ namespace Xadrez
             if (testeXequeMate(adversaria(JogadorAtual)))
             {
                 terminada = true;
-                Console.WriteLine("XEQUEMATE!!");
-                Console.WriteLine("Vencedor: " + JogadorAtual);
             }
             else
             {
