@@ -10,72 +10,48 @@ namespace Xadrez
 
         public override string ToString()
         {
-            return "T ";
+            return PECA_TORRE;
         }
 
         private bool podeMover(Posicao pos)
         {
-            Peca p = tab.peca(pos);
-            return p == null || p.cor != cor;
+            Peca peca = Tabuleiro.peca(pos);
+            return peca == null || peca.Cor != Cor;
         }
 
-        public override bool[,] movimentosPossiveis()
+        public override bool[,] MovimentosPossiveis()
         {
-            bool[,] mat = new bool[tab.Linhas, tab.Colunas];
-            Posicao pos = new Posicao(0, 0);
-
+            bool[,] mMovimentosPossiveis = new bool[Tabuleiro.Linhas, Tabuleiro.Colunas];
+            
             //acima
-            pos.definirValores(posicao.Linha - 1, posicao.Coluna);
-            while (!tab.posicaoValida(pos) && podeMover(pos))
-            {
-                mat[pos.Linha, pos.Coluna] = true;
-
-                if (tab.peca(pos) != null && tab.peca(pos).cor != cor)
-                {
-                    break;
-                }
-                pos.Linha--;
-            }
-
+            MovimentosPossiveis(ref mMovimentosPossiveis, -1, 0);
             //abaixo
-            pos.definirValores(posicao.Linha + 1, posicao.Coluna);
-            while (!tab.posicaoValida(pos) && podeMover(pos))
-            {
-                mat[pos.Linha, pos.Coluna] = true;
-
-                if (tab.peca(pos) != null && tab.peca(pos).cor != cor)
-                {
-                    break;
-                }
-                pos.Linha++;
-            }
-
+            MovimentosPossiveis(ref mMovimentosPossiveis, 1, 0);
             //direita
-            pos.definirValores(posicao.Linha, posicao.Coluna + 1);
-            while (!tab.posicaoValida(pos) && podeMover(pos))
-            {
-                mat[pos.Linha, pos.Coluna] = true;
-
-                if (tab.peca(pos) != null && tab.peca(pos).cor != cor)
-                {
-                    break;
-                }
-                pos.Coluna++;
-            }
-
+            MovimentosPossiveis(ref mMovimentosPossiveis, 0, 1);
             //esquerda
-            pos.definirValores(posicao.Linha, posicao.Coluna -1);
-            while (!tab.posicaoValida(pos) && podeMover(pos))
-            {
-                mat[pos.Linha, pos.Coluna] = true;
+            MovimentosPossiveis(ref mMovimentosPossiveis, 0, -1);
+            
+            return mMovimentosPossiveis;
+        }
 
-                if (tab.peca(pos) != null && tab.peca(pos).cor != cor)
+        private void MovimentosPossiveis(ref bool[,]mMovimentosPossiveis, int somaLinha, int somaColuna)
+        {
+            var posicao = new Posicao(0, 0);
+
+            posicao.definirValores(posicao.Linha + somaLinha, posicao.Coluna + somaColuna);
+
+            while (!Tabuleiro.posicaoValida(posicao) && podeMover(posicao))
+            {
+                mMovimentosPossiveis[posicao.Linha, posicao.Coluna] = true;
+
+                if (Tabuleiro.peca(posicao) != null && Tabuleiro.peca(posicao).Cor != Cor)
                 {
                     break;
                 }
-                pos.Coluna--;
+                posicao.Linha += somaLinha;
+                posicao.Coluna += somaColuna;
             }
-            return mat;
         }
     }
 }

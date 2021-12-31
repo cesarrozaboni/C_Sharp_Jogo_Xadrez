@@ -10,69 +10,51 @@ namespace Xadrez
 
         public override string ToString()
         {
-            return "C ";
+            return PECA_CAVALO;
         }
 
-        private bool podeMover(Posicao pos)
+        private bool podeMover(Posicao posicao)
         {
-            Peca p = tab.peca(pos);
-            return p == null || p.cor != cor;
+            Peca peca = Tabuleiro.peca(posicao);
+            return peca == null || peca.Cor != Cor;
         }
 
-        public override bool[,] movimentosPossiveis()
+        public override bool[,] MovimentosPossiveis()
         {
-            bool[,] mat = new bool[tab.Linhas, tab.Colunas];
-            Posicao pos = new Posicao(0, 0);
+            bool[,] mMovimentosPossiveis = new bool[Tabuleiro.Linhas, Tabuleiro.Colunas];
+            Posicao posicao = new Posicao(0, 0);
 
-            pos.definirValores(posicao.Linha - 1, posicao.Coluna -2);
-            if (!tab.posicaoValida(pos) && podeMover(pos))
-            {
-                mat[pos.Linha, pos.Coluna] = true;
-            }
-          
-            pos.definirValores(posicao.Linha - 2, posicao.Coluna - 1);
-            if (!tab.posicaoValida(pos) && podeMover(pos))
-            {
-                mat[pos.Linha, pos.Coluna] = true;
-            }
-            
-            pos.definirValores(posicao.Linha - 2, posicao.Coluna + 1);
-            if (!tab.posicaoValida(pos) && podeMover(pos))
-            {
-                mat[pos.Linha, pos.Coluna] = true;
-            }
+            posicao.definirValores(Posicao.Linha - 1, Posicao.Coluna -2);
+            PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
 
-            pos.definirValores(posicao.Linha - 1, posicao.Coluna + 2);
-            if (!tab.posicaoValida(pos) && podeMover(pos))
-            {
-                mat[pos.Linha, pos.Coluna] = true;
-            }
+            posicao.definirValores(Posicao.Linha - 2, Posicao.Coluna - 1);
+            PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
 
-            pos.definirValores(posicao.Linha + 1, posicao.Coluna + 2);
-            if (!tab.posicaoValida(pos) && podeMover(pos))
-            {
-                mat[pos.Linha, pos.Coluna] = true;
-            }
+            posicao.definirValores(Posicao.Linha - 2, Posicao.Coluna + 1);
+            PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
 
-            pos.definirValores(posicao.Linha + 2, posicao.Coluna + 1);
-            if (!tab.posicaoValida(pos) && podeMover(pos))
-            {
-                mat[pos.Linha, pos.Coluna] = true;
-            }
+            posicao.definirValores(Posicao.Linha - 1, Posicao.Coluna + 2);
+            PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
 
-            pos.definirValores(posicao.Linha + 2, posicao.Coluna - 1);
-            if (!tab.posicaoValida(pos) && podeMover(pos))
-            {
-                mat[pos.Linha, pos.Coluna] = true;
-            }
+            posicao.definirValores(Posicao.Linha + 1, Posicao.Coluna + 2);
+            PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
 
-            pos.definirValores(posicao.Linha + 1, posicao.Coluna - 2);
-            if (!tab.posicaoValida(pos) && podeMover(pos))
-            {
-                mat[pos.Linha, pos.Coluna] = true;
-            }
+            posicao.definirValores(Posicao.Linha + 2, Posicao.Coluna + 1);
+            PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
 
-            return mat;
+            posicao.definirValores(Posicao.Linha + 2, Posicao.Coluna - 1);
+            PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
+
+            posicao.definirValores(Posicao.Linha + 1, Posicao.Coluna - 2);
+            PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
+
+            return mMovimentosPossiveis;
+        }
+
+        private void PosicoesPossiveis(ref bool[,] mMovimentos, Posicao posicao)
+        {
+            if (!Tabuleiro.posicaoValida(posicao) && podeMover(posicao))
+                mMovimentos[Posicao.Linha, posicao.Coluna] = true;
         }
     }
 }
