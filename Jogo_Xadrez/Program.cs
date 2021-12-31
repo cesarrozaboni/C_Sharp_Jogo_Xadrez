@@ -22,7 +22,7 @@ namespace Jogo_Xadrez
                         Posicao origem = Tela.lerPosicaoXadrez().toPosicao();
                         partida.validarPosicaoDeOrigem(origem);
 
-                        bool[,] posicoesPossiveis = partida.tab.peca(origem).movimentosPossiveis();
+                        bool[,] posicoesPossiveis = partida.tab.peca(origem).MovimentosPossiveis();
                         Console.Clear();
                         Tela.imprimirTabuleiro(partida.tab, posicoesPossiveis);
                         Console.WriteLine();
@@ -43,6 +43,7 @@ namespace Jogo_Xadrez
                 Console.Clear();
                 Tela.imprimirPartida(partida);
             }
+            
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
