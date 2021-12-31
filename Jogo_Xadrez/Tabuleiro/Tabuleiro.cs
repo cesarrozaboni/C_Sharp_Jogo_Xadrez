@@ -19,6 +19,7 @@ namespace tabuleiro
         {
             return pecas[linha, coluna];
         }
+
         public Peca peca(Posicao pos)
         {
             return pecas[pos.Linha, pos.Coluna];
@@ -31,7 +32,7 @@ namespace tabuleiro
                 throw new TabuleiroException("Ja Existe uma peça nesta posição");
             }
             pecas[pos.Linha, pos.Coluna] = p;
-            p.posicao = pos;
+            p.Posicao = pos;
         }
 
         public Peca retirarPeca(Posicao pos)
@@ -41,7 +42,7 @@ namespace tabuleiro
                 return null;
             }
             Peca aux = peca(pos);
-            aux.posicao = null;
+            aux.Posicao = null;
             pecas[pos.Linha, pos.Coluna] = null;
             return aux;
         }
