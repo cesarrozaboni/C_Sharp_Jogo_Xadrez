@@ -2,86 +2,33 @@
 using tabuleiro;
 using Xadrez;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Jogo_Xadrez
 {
     class Tela
     {
-        public static void imprimirTabuleiro(Tabuleiro tab)
-        {
-            for (int i = 0; i < tab.Linhas; i++)
-            {
-                Console.Write(8 - i + " ");
-                for (int j = 0; j < tab.Colunas; j++)
-                {
-                    imprimirPeca(tab.peca(i, j));
-                }
-                Console.WriteLine();
-            }
-            Console.Write("  a  b  c  d  e  f  g  h");
-        }
+        public const string SEM_PECA = "\u002D";
+        public const string CABECALHO_COLUNAS_TABULEIRO = "  A  B  C  D  E  F  G  H";
 
-        public static void imprimirTabuleiro(Tabuleiro tab, bool[,] posicoesPossiveis)
+        /// <summary>
+        /// Inicia a partida de Xadrez
+        /// </summary>
+        /// <param name="partida"></param>
+        public static void IniciarJogo(PartidaDeXadrez partida)
         {
-            ConsoleColor fundoOriginal = Console.BackgroundColor;
-            ConsoleColor fundoAlterado = ConsoleColor.DarkGray;
-
-            for (int i = 0; i < tab.Linhas; i++)
-            {
-                Console.Write(8 - i + " ");
-                for (int j = 0; j < tab.Colunas; j++)
-                {
-                    if (posicoesPossiveis[i, j])
-                    {
-                        Console.BackgroundColor = fundoAlterado;
-                    }
-                    else
-                    {
-                        Console.BackgroundColor = fundoOriginal;
-                    }
-                    imprimirPeca(tab.peca(i, j));
-                    Console.BackgroundColor = fundoOriginal;
-                }
-                Console.WriteLine();
-            }
-            Console.Write("  a  b  c  d  e  f  g  h");
-            Console.BackgroundColor = fundoOriginal;
-        }
-
-        public static PosicaoXadrez lerPosicaoXadrez()
-        {
-            string s = Console.ReadLine();
-            if(s.Length < 2)
-            {
-                throw new TabuleiroException("Posição Invalida");
-            }
-            var aux = s.Substring(0, 1);
-            if (aux.Contains("a") || aux.Contains("b") || aux.Contains("c") || aux.Contains("d") || aux.Contains("e") || aux.Contains("f") || aux.Contains("g") || aux.Contains("h"))
-            {
-                char coluna = s[0];
-                int linha = int.Parse(s[1] + "");
-                return new PosicaoXadrez(coluna, linha);
-            }
-            else
-            {
-                throw new TabuleiroException("Posicao Invalida");
-            }
-        }
-
-        public static void imprimirPartida(PartidaDeXadrez partida)
-        {
-            imprimirTabuleiro(partida.tab);
+            ImprimirTabuleiro(partida.Tabuleiro);
 
             Console.WriteLine();
-            imprimirPecasCapturadas(partida);
+            ImprimirPecasCapturadas(partida);
 
             Console.WriteLine();
-            Console.WriteLine("Turno: " + partida.turno);
-            if (!partida.terminada)
+            Console.WriteLine("Turno: " + partida.Turno);
+            if (!partida.Terminada)
             {
                 Console.WriteLine("Agurdando Jogada: " + partida.JogadorAtual);
 
-                if (partida.xeque)
+                if (partida.Xeque)
                 {
                     Console.WriteLine("Xeque!");
                 }
@@ -93,7 +40,64 @@ namespace Jogo_Xadrez
             }
         }
 
-        public static void imprimirPecasCapturadas(PartidaDeXadrez partida)
+        /// <summary>
+        /// Imprime tabuleiro e peças
+        /// </summary>
+        /// <param name="tabuleiro"></param>
+        public static void ImprimirTabuleiro(Tabuleiro tabuleiro)
+        {
+            for (int linha = 0; linha < tabuleiro.Linhas; linha++)
+            {
+                ImprimeCabecalhoLinha(linha, tabuleiro);
+                for (int coluna = 0; coluna < tabuleiro.Colunas; coluna++)
+                {
+                    ImprimirPeca(tabuleiro.Peca(linha, coluna));
+                }
+                Console.WriteLine();
+            }
+
+            TrocarCorConsole(ConsoleColor.DarkGray);
+            Console.Write(CABECALHO_COLUNAS_TABULEIRO);
+            TrocarCorConsole();
+        }
+
+        private static void ImprimeCabecalhoLinha(int linha, Tabuleiro tabuleiro)
+        {
+            TrocarCorConsole(ConsoleColor.DarkGray);
+            Console.Write(tabuleiro.Linhas - linha + string.Empty.Space());
+            TrocarCorConsole();
+        }
+
+        public static void ImprimirMovimentosPossiveis(Tabuleiro tabuleiro, Posicao posicao)
+        {
+            Peca peca = tabuleiro.Peca(posicao);
+            bool[,] mPosicoesPossiveis = peca.MovimentosPossiveis();
+
+            for (int linha = 0; linha < tabuleiro.Linhas; linha++)
+            {
+                ImprimeCabecalhoLinha(linha, tabuleiro);
+                for (int coluna = 0; coluna < tabuleiro.Colunas; coluna++)
+                {
+                    TrocarCorConsole(background: mPosicoesPossiveis[linha, coluna] ? ConsoleColor.DarkGray : ConsoleColor.Black);
+                    ImprimirPeca(tabuleiro.Peca(linha, coluna));
+                }
+
+                Console.WriteLine();
+            }
+            Console.Write(CABECALHO_COLUNAS_TABULEIRO);
+            TrocarCorConsole();
+        }
+
+        /// <summary>
+        /// input posição de origem e destino
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="TabuleiroException"></exception>
+
+
+       
+
+        public static void ImprimirPecasCapturadas(PartidaDeXadrez partida)
         {
             Console.WriteLine("Peças capturadas:");
             Console.Write("Brancas: ");
@@ -107,37 +111,45 @@ namespace Jogo_Xadrez
             Console.WriteLine();
         }
 
-        public static void imprimirConjunto(HashSet<Peca> conjunto)
+        public static void imprimirConjunto(HashSet<Peca> pecasCapturadas)
         {
-            Console.Write("[");
-            foreach (Peca x in conjunto)
-            {
-                Console.Write(x + " ");
-            }
-            Console.Write("]");
+            StringBuilder capturadas = new StringBuilder();
+
+            foreach (Peca x in pecasCapturadas)
+                capturadas.Append(x.ToString().Space());
+            
+            Console.Write($"[{ capturadas }]");
         }
 
-        public static void imprimirPeca(Peca peca)
+        public static void ImprimirPeca(Peca peca)
         {
             if (peca == null)
             {
-                Console.Write("- ");
+                ImprimirPosicaoVazia();
+                return;
             }
-            else
-            {
-                if (peca.Cor == Cor.Branca)
-                {
-                    Console.Write(peca);
-                }
-                else
-                {
-                    ConsoleColor aux = Console.ForegroundColor;
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    Console.Write(peca);
-                    Console.ForegroundColor = aux;
-                }
-            }
-            Console.Write(" ");
+
+            TrocarCorConsole(foreground : peca.Cor.Equals(Cor.Branca) ? ConsoleColor.Gray : ConsoleColor.DarkYellow);
+            Console.Write(peca);
+            TrocarCorConsole();
+            Console.Write(string.Empty.Space());
+        }
+
+        private static void ImprimirPosicaoVazia()
+        {
+            Console.Write(SEM_PECA.Space());
+            Console.Write(string.Empty.Space());
+        }
+
+        /// <summary>
+        /// Troca a cor do Console
+        /// </summary>
+        /// <param name="fundo"></param>
+        /// <param name="caracter"></param>
+        private static void TrocarCorConsole(ConsoleColor background = ConsoleColor.Black, ConsoleColor foreground = ConsoleColor.Gray)
+        {
+            Console.BackgroundColor = background;
+            Console.ForegroundColor = foreground;
         }
     }
 }
