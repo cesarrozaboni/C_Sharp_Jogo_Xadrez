@@ -16,13 +16,13 @@ namespace Xadrez
 
         private bool ExisteInimigo(Posicao pos)
         {
-            Peca peca = Tabuleiro.peca(pos);
+            Peca peca = Tabuleiro.Peca(pos);
             return peca == null || peca.Cor != Cor;
         }
 
         private bool livre(Posicao pos)
         {
-            return Tabuleiro.peca(pos) == null;
+            return Tabuleiro.Peca(pos) == null;
         }
 
         public override bool[,] MovimentosPossiveis()
@@ -32,46 +32,46 @@ namespace Xadrez
 
             if (Cor == Cor.Branca)
             {
-                pos.definirValores(Posicao.Linha - 1, Posicao.Coluna);
-                if (!Tabuleiro.posicaoValida(pos) && livre(pos))
+                pos.DefinirValores(Posicao.Linha - 1, Posicao.Coluna);
+                if (!Tabuleiro.PosicaoValida(pos) && livre(pos))
                 {
                     mat[pos.Linha, pos.Coluna] = true;
                 }
-                pos.definirValores(Posicao.Linha - 2, Posicao.Coluna);
-                if (!Tabuleiro.posicaoValida(pos) && livre(pos) && QtdMovimentos == 0)
+                pos.DefinirValores(Posicao.Linha - 2, Posicao.Coluna);
+                if (!Tabuleiro.PosicaoValida(pos) && livre(pos) && QtdMovimentos == 0)
                 {
                     mat[pos.Linha, pos.Coluna] = true;
                 }
-                pos.definirValores(Posicao.Linha - 1, Posicao.Coluna - 1);
-                if (!Tabuleiro.posicaoValida(pos) && ExisteInimigo(pos))
+                pos.DefinirValores(Posicao.Linha - 1, Posicao.Coluna - 1);
+                if (!Tabuleiro.PosicaoValida(pos) && ExisteInimigo(pos))
                 {
                     mat[pos.Linha, pos.Coluna] = true;
                 }
-                pos.definirValores(Posicao.Linha - 1, Posicao.Coluna + 1);
-                if (!Tabuleiro.posicaoValida(pos) && ExisteInimigo(pos))
+                pos.DefinirValores(Posicao.Linha - 1, Posicao.Coluna + 1);
+                if (!Tabuleiro.PosicaoValida(pos) && ExisteInimigo(pos))
                 {
                     mat[pos.Linha, pos.Coluna] = true;
                 }
             }
             else
             {
-                pos.definirValores(Posicao.Linha + 1, Posicao.Coluna);
-                if (!Tabuleiro.posicaoValida(pos) && livre(pos))
+                pos.DefinirValores(Posicao.Linha + 1, Posicao.Coluna);
+                if (!Tabuleiro.PosicaoValida(pos) && livre(pos))
                 {
                     mat[pos.Linha, pos.Coluna] = true;
                 }
-                pos.definirValores(Posicao.Linha + 2, Posicao.Coluna);
-                if (!Tabuleiro.posicaoValida(pos) && livre(pos) && QtdMovimentos == 0)
+                pos.DefinirValores(Posicao.Linha + 2, Posicao.Coluna);
+                if (!Tabuleiro.PosicaoValida(pos) && livre(pos) && QtdMovimentos == 0)
                 {
                     mat[pos.Linha, pos.Coluna] = true;
                 }
-                pos.definirValores(Posicao.Linha + 1, Posicao.Coluna - 1);
-                if (!Tabuleiro.posicaoValida(pos) && ExisteInimigo(pos))
+                pos.DefinirValores(Posicao.Linha + 1, Posicao.Coluna - 1);
+                if (!Tabuleiro.PosicaoValida(pos) && ExisteInimigo(pos))
                 {
                     mat[pos.Linha, pos.Coluna] = true;
                 }
-                pos.definirValores(Posicao.Linha + 1, Posicao.Coluna + 1);
-                if (!Tabuleiro.posicaoValida(pos) && ExisteInimigo(pos))
+                pos.DefinirValores(Posicao.Linha + 1, Posicao.Coluna + 1);
+                if (!Tabuleiro.PosicaoValida(pos) && ExisteInimigo(pos))
                 {
                     mat[pos.Linha, pos.Coluna] = true;
                 }

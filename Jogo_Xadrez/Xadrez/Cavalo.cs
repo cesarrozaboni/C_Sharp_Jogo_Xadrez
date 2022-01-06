@@ -15,7 +15,7 @@ namespace Xadrez
 
         private bool podeMover(Posicao posicao)
         {
-            Peca peca = Tabuleiro.peca(posicao);
+            Peca peca = Tabuleiro.Peca(posicao);
             return peca == null || peca.Cor != Cor;
         }
 
@@ -24,28 +24,28 @@ namespace Xadrez
             bool[,] mMovimentosPossiveis = new bool[Tabuleiro.Linhas, Tabuleiro.Colunas];
             Posicao posicao = new Posicao(0, 0);
 
-            posicao.definirValores(Posicao.Linha - 1, Posicao.Coluna -2);
+            posicao.DefinirValores(Posicao.Linha - 1, Posicao.Coluna -2);
             PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
 
-            posicao.definirValores(Posicao.Linha - 2, Posicao.Coluna - 1);
+            posicao.DefinirValores(Posicao.Linha - 2, Posicao.Coluna - 1);
             PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
 
-            posicao.definirValores(Posicao.Linha - 2, Posicao.Coluna + 1);
+            posicao.DefinirValores(Posicao.Linha - 2, Posicao.Coluna + 1);
             PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
 
-            posicao.definirValores(Posicao.Linha - 1, Posicao.Coluna + 2);
+            posicao.DefinirValores(Posicao.Linha - 1, Posicao.Coluna + 2);
             PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
 
-            posicao.definirValores(Posicao.Linha + 1, Posicao.Coluna + 2);
+            posicao.DefinirValores(Posicao.Linha + 1, Posicao.Coluna + 2);
             PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
 
-            posicao.definirValores(Posicao.Linha + 2, Posicao.Coluna + 1);
+            posicao.DefinirValores(Posicao.Linha + 2, Posicao.Coluna + 1);
             PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
 
-            posicao.definirValores(Posicao.Linha + 2, Posicao.Coluna - 1);
+            posicao.DefinirValores(Posicao.Linha + 2, Posicao.Coluna - 1);
             PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
 
-            posicao.definirValores(Posicao.Linha + 1, Posicao.Coluna - 2);
+            posicao.DefinirValores(Posicao.Linha + 1, Posicao.Coluna - 2);
             PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
 
             return mMovimentosPossiveis;
@@ -53,7 +53,7 @@ namespace Xadrez
 
         private void PosicoesPossiveis(ref bool[,] mMovimentos, Posicao posicao)
         {
-            if (!Tabuleiro.posicaoValida(posicao) && podeMover(posicao))
+            if (!Tabuleiro.PosicaoValida(posicao) && podeMover(posicao))
                 mMovimentos[Posicao.Linha, posicao.Coluna] = true;
         }
     }

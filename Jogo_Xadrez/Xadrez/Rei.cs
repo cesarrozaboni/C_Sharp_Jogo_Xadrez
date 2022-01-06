@@ -18,13 +18,13 @@ namespace Xadrez
 
         private bool PodeMover(Posicao pos)
         {
-            Peca peca = Tabuleiro.peca(pos);
+            Peca peca = Tabuleiro.Peca(pos);
             return peca == null || peca.Cor != Cor;
         }
 
         private bool TesteTorreParaRoque(Posicao pos)
         {
-            Peca peca = Tabuleiro.peca(pos);
+            Peca peca = Tabuleiro.Peca(pos);
             return peca is Torre && peca.Cor == Cor && peca.QtdMovimentos == 0;
         }
 
@@ -60,7 +60,7 @@ namespace Xadrez
                     Posicao posicao1 = new Posicao(Posicao.Linha, Posicao.Coluna + 1);
                     Posicao posicao2 = new Posicao(Posicao.Linha, Posicao.Coluna + 2);
 
-                    if(Tabuleiro.peca(posicao1) == null && Tabuleiro.peca(posicao2) == null)
+                    if(Tabuleiro.Peca(posicao1) == null && Tabuleiro.Peca(posicao2) == null)
                     {
                         mMovimentosPossiveis[Posicao.Linha, Posicao.Coluna + 2] = true;
                     }
@@ -75,7 +75,7 @@ namespace Xadrez
                     Posicao p2 = new Posicao(Posicao.Linha, Posicao.Coluna - 2);
                     Posicao p3 = new Posicao(Posicao.Linha, Posicao.Coluna - 3);
 
-                    if (Tabuleiro.peca(p1) == null && Tabuleiro.peca(p2) == null && Tabuleiro.peca(p3) == null)
+                    if (Tabuleiro.Peca(p1) == null && Tabuleiro.Peca(p2) == null && Tabuleiro.Peca(p3) == null)
                     {
                         mMovimentosPossiveis[Posicao.Linha, Posicao.Coluna - 2] = true;
                     }
@@ -87,15 +87,15 @@ namespace Xadrez
         private void MovimentosPossiveis(ref bool[,]mMovimentosPossiveis, int somaLinha, int somaColuna)
         {
             Posicao posicao = new Posicao(0, 0);
-            posicao.definirValores(Posicao.Linha + somaLinha, Posicao.Coluna + somaColuna);
+            posicao.DefinirValores(Posicao.Linha + somaLinha, Posicao.Coluna + somaColuna);
 
-            if(!Tabuleiro.posicaoValida(posicao) && PodeMover(posicao))
+            if(!Tabuleiro.PosicaoValida(posicao) && PodeMover(posicao))
                     mMovimentosPossiveis[posicao.Linha, posicao.Coluna] = true;
         }
 
         private bool PodeJogarRoque()
         {
-            return QtdMovimentos.Equals(0) && !partida.xeque;
+            return QtdMovimentos.Equals(0) && !partida.Xeque;
         }
     }
 }

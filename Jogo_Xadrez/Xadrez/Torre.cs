@@ -15,7 +15,7 @@ namespace Xadrez
 
         private bool podeMover(Posicao pos)
         {
-            Peca peca = Tabuleiro.peca(pos);
+            Peca peca = Tabuleiro.Peca(pos);
             return peca == null || peca.Cor != Cor;
         }
 
@@ -39,13 +39,13 @@ namespace Xadrez
         {
             var posicao = new Posicao(0, 0);
 
-            posicao.definirValores(posicao.Linha + somaLinha, posicao.Coluna + somaColuna);
+            posicao.DefinirValores(posicao.Linha + somaLinha, posicao.Coluna + somaColuna);
 
-            while (!Tabuleiro.posicaoValida(posicao) && podeMover(posicao))
+            while (!Tabuleiro.PosicaoValida(posicao) && podeMover(posicao))
             {
                 mMovimentosPossiveis[posicao.Linha, posicao.Coluna] = true;
 
-                if (Tabuleiro.peca(posicao) != null && Tabuleiro.peca(posicao).Cor != Cor)
+                if (Tabuleiro.Peca(posicao) != null && Tabuleiro.Peca(posicao).Cor != Cor)
                 {
                     break;
                 }

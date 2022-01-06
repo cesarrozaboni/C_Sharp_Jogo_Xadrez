@@ -1,25 +1,30 @@
-﻿namespace tabuleiro
+﻿using System;
+
+namespace tabuleiro
 {
     class Posicao
     {
+        
         public int Linha { get; set; }
         public int Coluna { get; set; }
 
         public Posicao(int linha, int coluna)
         {
-            this.Linha = linha;
-            this.Coluna = coluna;
+            Linha  = linha;
+            Coluna = coluna;
         }
 
-        public void definirValores(int linha, int coluna)
+        public void DefinirValores(int linha, int coluna)
         {
-            this.Linha = linha;
-            this.Coluna = coluna;
+            Linha = linha;
+            Coluna = coluna;
         }
 
         public override string ToString()
         {
             return Linha + ", " + Coluna;
         }
+
+
     }
 }

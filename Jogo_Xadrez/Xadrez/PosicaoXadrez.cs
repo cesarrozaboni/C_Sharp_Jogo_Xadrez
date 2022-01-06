@@ -14,9 +14,9 @@ namespace Xadrez
             this.linha = linha;
         }
 
-        public Posicao toPosicao()
+        public Posicao GetPosicao()
         {
-            return new Posicao(8 - linha, coluna - 'a');
+            return new Posicao(8 - linha, coluna - 'A');
         }
 
         public override string ToString()

@@ -15,7 +15,7 @@ namespace Xadrez
 
         private bool podeMover(Posicao pos)
         {
-            Peca peca = Tabuleiro.peca(pos);
+            Peca peca = Tabuleiro.Peca(pos);
             return peca == null || peca.Cor != Cor;
         }
 
@@ -46,18 +46,18 @@ namespace Xadrez
         private void VerificarPosicoes(ref bool[,]mMovimentosPossiveis, int somaLinha, int somaColuna)
         {
             Posicao posicao = new Posicao(0, 0);
-            posicao.definirValores(Posicao.Linha + somaLinha, Posicao.Coluna + somaColuna);
+            posicao.DefinirValores(Posicao.Linha + somaLinha, Posicao.Coluna + somaColuna);
 
-            while (!Tabuleiro.posicaoValida(posicao) && podeMover(posicao))
+            while (!Tabuleiro.PosicaoValida(posicao) && podeMover(posicao))
             {
                 mMovimentosPossiveis[posicao.Linha, posicao.Coluna] = true;
-                if (Tabuleiro.peca(posicao) == null)
+                if (Tabuleiro.Peca(posicao) == null)
                     break;
                 
-                if (Tabuleiro.peca(posicao) != null && Tabuleiro.peca(posicao).Cor != Cor)
+                if (Tabuleiro.Peca(posicao) != null && Tabuleiro.Peca(posicao).Cor != Cor)
                     break;
                 
-                posicao.definirValores(Posicao.Linha + 1, Posicao.Coluna - 1);
+                posicao.DefinirValores(Posicao.Linha + 1, Posicao.Coluna - 1);
             }
         }
     }
