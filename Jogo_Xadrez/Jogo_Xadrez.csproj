@@ -51,6 +51,15 @@
     <Compile Include="tabuleiro\Tabuleiro.cs" />
     <Compile Include="tabuleiro\TabuleiroException.cs" />
     <Compile Include="Tela.cs" />
+    <Compile Include="Util\ExtensionMethods.cs" />
+    <Compile Include="Util\GameUtil.cs" />
+    <Compile Include="Util\MessageGame.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MessageGame.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Util\Result.cs" />
+    <Compile Include="Util\ResultInfo.cs" />
     <Compile Include="Xadrez\Bispo.cs" />
     <Compile Include="Xadrez\Cavalo.cs" />
     <Compile Include="Xadrez\Dama.cs" />
@@ -62,6 +71,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Util\MessageGame.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MessageGame.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
