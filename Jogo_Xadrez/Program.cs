@@ -27,7 +27,7 @@ namespace Jogo_Xadrez
                     continue;
                 try
                 {
-                    PartidaDeXadrez.realizaJogada(posicaoOrigem, destino.Item);
+                    PartidaDeXadrez.RealizaJogada(posicaoOrigem, destino.Item);
                 }
                 catch (TabuleiroException e)
                 {

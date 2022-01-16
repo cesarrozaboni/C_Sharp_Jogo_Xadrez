@@ -35,6 +35,11 @@ namespace tabuleiro
             peca.Posicao = posicao;
         }
 
+        /// <summary>
+        /// remove piece from board
+        /// </summary>
+        /// <param name="posicao">position of piece</param>
+        /// <returns>piece removed if have</returns>
         public Peca RetirarPeca(Posicao posicao)
         {
             if(Peca(posicao) == null)
@@ -49,7 +54,7 @@ namespace tabuleiro
 
         public bool PosicaoValida(Posicao posicao)
         {
-            return (posicao.Linha < 0 || posicao.Linha >= Linhas || posicao.Coluna < 0 || posicao.Coluna >= Colunas);
+            return posicao.Linha < 0 || posicao.Linha >= Linhas || posicao.Coluna < 0 || posicao.Coluna >= Colunas;
         }
 
         public void ValidarPosicao(Posicao pos)

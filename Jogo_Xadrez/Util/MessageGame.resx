@@ -129,6 +129,9 @@
   <data name="msg_Nao_Ha_Movimentos_Possiveis_Para_A_Peca_De_Origem_Escolhida" xml:space="preserve">
     <value>NÃO HA MOVIMENTOS POSSÍVEIS PARA A PEÇA DE ORIGEM ESCOLHIDA</value>
   </data>
+  <data name="msg_Nao_Possui_Rei_Da_Cor_X0_Em_Jogo" xml:space="preserve">
+    <value>NÃO POSSUI REI DA COR {0} EM JOGO</value>
+  </data>
   <data name="msg_Origem" xml:space="preserve">
     <value>Origem: </value>
     <comment>jogador de origem</comment>
@@ -138,5 +141,8 @@
   </data>
   <data name="msg_Posicao_Invalida" xml:space="preserve">
     <value>POSIÇÃO INVALIDA!</value>
+  </data>
+  <data name="msg_Voce_Nao_Pode_Se_Por_Em_Xeque" xml:space="preserve">
+    <value>VOCE NÃO PODE SE POR EM XEQUE</value>
   </data>
 </root>

@@ -97,6 +97,15 @@ namespace Jogo_Xadrez.Util {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to NÃO POSSUI REI DA COR {0} EM JOGO.
+        /// </summary>
+        internal static string msg_Nao_Possui_Rei_Da_Cor_X0_Em_Jogo {
+            get {
+                return ResourceManager.GetString("msg_Nao_Possui_Rei_Da_Cor_X0_Em_Jogo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Origem: .
         /// </summary>
         internal static string msg_Origem {
@@ -120,6 +129,15 @@ namespace Jogo_Xadrez.Util {
         internal static string msg_Posicao_Invalida {
             get {
                 return ResourceManager.GetString("msg_Posicao_Invalida", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VOCE NÃO PODE SE POR EM XEQUE.
+        /// </summary>
+        internal static string msg_Voce_Nao_Pode_Se_Por_Em_Xeque {
+            get {
+                return ResourceManager.GetString("msg_Voce_Nao_Pode_Se_Por_Em_Xeque", resourceCulture);
             }
         }
     }

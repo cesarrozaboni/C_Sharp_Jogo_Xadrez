@@ -51,6 +51,8 @@ namespace Jogo_Xadrez
                 ImprimeCabecalhoLinha(linha, tabuleiro);
                 for (int coluna = 0; coluna < tabuleiro.Colunas; coluna++)
                 {
+                    TrocarCorConsole(background: ConsoleColor.Black,
+                        foreground: tabuleiro.Peca(linha, coluna) == null ? ConsoleColor.Gray : tabuleiro.Peca(linha, coluna).Cor.Equals(Cor.Branca) ? ConsoleColor.Gray : ConsoleColor.DarkYellow);
                     ImprimirPeca(tabuleiro.Peca(linha, coluna));
                 }
                 Console.WriteLine();
@@ -78,7 +80,8 @@ namespace Jogo_Xadrez
                 ImprimeCabecalhoLinha(linha, tabuleiro);
                 for (int coluna = 0; coluna < tabuleiro.Colunas; coluna++)
                 {
-                    TrocarCorConsole(background: mPosicoesPossiveis[linha, coluna] ? ConsoleColor.DarkGray : ConsoleColor.Black);
+                    TrocarCorConsole(background: mPosicoesPossiveis[linha, coluna] ? ConsoleColor.DarkGray : ConsoleColor.Black, 
+                        foreground: tabuleiro.Peca(linha, coluna) == null ? ConsoleColor.Gray : tabuleiro.Peca(linha, coluna).Cor.Equals(Cor.Branca) ? ConsoleColor.Gray : ConsoleColor.DarkYellow);
                     ImprimirPeca(tabuleiro.Peca(linha, coluna));
                 }
 
@@ -101,12 +104,12 @@ namespace Jogo_Xadrez
         {
             Console.WriteLine("Peças capturadas:");
             Console.Write("Brancas: ");
-            imprimirConjunto(partida.pecasCapturadas(Cor.Branca));
+            imprimirConjunto(partida.PecasCapturadas(Cor.Branca));
             Console.WriteLine();
             Console.Write("Pretas: ");
             ConsoleColor aux = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Yellow;
-            imprimirConjunto(partida.pecasCapturadas(Cor.Preta));
+            imprimirConjunto(partida.PecasCapturadas(Cor.Preta));
             Console.ForegroundColor = aux;
             Console.WriteLine();
         }
@@ -128,10 +131,7 @@ namespace Jogo_Xadrez
                 ImprimirPosicaoVazia();
                 return;
             }
-
-            TrocarCorConsole(foreground : peca.Cor.Equals(Cor.Branca) ? ConsoleColor.Gray : ConsoleColor.DarkYellow);
             Console.Write(peca);
-            TrocarCorConsole();
             Console.Write(string.Empty.Space());
         }
 

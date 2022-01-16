@@ -52,12 +52,19 @@ namespace Xadrez
             {
                 mMovimentosPossiveis[posicao.Linha, posicao.Coluna] = true;
                 if (Tabuleiro.Peca(posicao) == null)
-                    break;
+                {
+                    posicao.DefinirValores(posicao.Linha + somaLinha, posicao.Coluna + somaColuna);
+                    continue;
+                }
+                    
                 
                 if (Tabuleiro.Peca(posicao) != null && Tabuleiro.Peca(posicao).Cor != Cor)
+                {
+                    posicao.DefinirValores(posicao.Linha + somaLinha, posicao.Coluna + somaColuna);
                     break;
-                
-                posicao.DefinirValores(Posicao.Linha + 1, Posicao.Coluna - 1);
+                }
+
+
             }
         }
     }
