@@ -3,222 +3,343 @@ using System;
 using System.Collections.Generic;
 using tabuleiro;
 using System.Linq;
+using Jogo_Xadrez;
 
 namespace Xadrez
 {
     class PartidaDeXadrez
     {
-        public const string CABECALHO_COLUNAS_TABULEIRO = "  A  B  C  D  E  F  G  H";
-        public Tabuleiro Tabuleiro { get; private set; }
-        public int Turno           { get; private set; }
-        public Cor JogadorAtual    { get; private set; }
-        public bool Terminada      { get; private set; }
-        public bool Xeque          { get; private set; }
-        public Peca VulneravelEnPassant;
-        
-        private readonly HashSet<Peca> HashPecasEmJogo;
-        private readonly HashSet<Peca> HashPecasCapturadas;
+        #region "Variaveis"
+        public Tabuleiro Board      { get; private set; }
+        public int Turn             { get; private set; }
+        public Cor CurrentPlayer    { get; private set; }
+        public bool EndGame         { get; private set; }
+        public bool Xeque           { get; private set; }
+        public Peca PieceEnPassant  { get; private set; }
+        private int AmountMoves     { get; set; }
+        private const int LIMITE_MOVE = 25;
+
+        private readonly HashSet<Peca> HashPiecesInGame;
+        private readonly HashSet<Peca> HashPiecesArrasted;
+        #endregion
 
         #region "Constructor"
+        /// <summary>
+        /// Initialize a new board to game
+        /// </summary>
         public PartidaDeXadrez()
         {
-            Tabuleiro    = new Tabuleiro(8, 8);
-            Turno        = 1;
-            JogadorAtual = Cor.Branca;
-            Terminada    = false;
-            Xeque        = false;
-            VulneravelEnPassant = null;
-            HashPecasEmJogo     = new HashSet<Peca>();
-            HashPecasCapturadas = new HashSet<Peca>();
-            colocarPecas();
+            Board              = new Tabuleiro(8, 8);
+            Turn               = 1;
+            CurrentPlayer      = Cor.Branca;
+            EndGame            = false;
+            Xeque              = false;
+            PieceEnPassant     = null;
+            HashPiecesInGame   = new HashSet<Peca>();
+            HashPiecesArrasted = new HashSet<Peca>();
+            AmountMoves        = 0;
+            AddPieceInGame();
         }
         #endregion
 
         #region "Executa Movimento"
+        /// <summary>
+        /// Play current turn of game
+        /// </summary>
+        /// <param name="positionOrigin">position origin of piece</param>
+        /// <param name="positionDestiny">position destiny of piece</param>
+        /// <exception cref="TabuleiroException"></exception>
+        public void PlayRound(Posicao positionOrigin, Posicao positionDestiny)
+        {
+            Peca pecaCapturada = ExecuteMove(positionOrigin, positionDestiny);
+
+            if (PlayerIsXeque(CurrentPlayer))
+            {
+                UndoMove(positionOrigin, positionDestiny, pecaCapturada);
+                throw new TabuleiroException(MessageGame.msg_Voce_Nao_Pode_Se_Por_Em_Xeque);
+            }
+
+            Peca piece = Board.GetPiece(positionDestiny);
+
+            if (pecaCapturada == null)
+                AmountMoves++;
+            else
+                AmountMoves = 0;
+
+            if (PromotionPlay(piece, positionDestiny))
+                ExecutePlayPromotion(positionDestiny);
+
+            Xeque = PlayerIsXeque(EnemyColor(CurrentPlayer));
+
+            if (Xeque && PlayIsXequeMate(EnemyColor(CurrentPlayer)))
+            {
+                Console.WriteLine("FIM DE JOGO, VENCEDOR: " + CurrentPlayer + "!");
+                EndGame = true;
+                return;
+            }
+
+            if(AmountMoves == LIMITE_MOVE)
+            {
+                Console.WriteLine("EMPATE!");
+                EndGame = true;
+                return;
+            }
+
+            Turn++;
+            ChangePlayer();
+            PieceEnPassant = IsVulnarableEnPassant(piece, positionOrigin, positionDestiny);
+        }
+
         /// <summary>
         /// execute a moviment of game
         /// </summary>
         /// <param name="posicaoOrigem">input origin of user</param>
         /// <param name="posicaoDestino">input destination of user</param>
         /// <returns>piece captured if have</returns>
-        public Peca ExecutaMovimento(Posicao posicaoOrigem, Posicao posicaoDestino)
+        public Peca ExecuteMove(Posicao positionOrigin, Posicao positionDestiny)
         {
-            Peca pecaOrigem = Tabuleiro.RetirarPeca(posicaoOrigem);
-            pecaOrigem.IncrementarQtdMovimentos();
+            Peca pieceOrigin = Board.RemovePiece(positionOrigin);
+            pieceOrigin.IncrementAmountMoves();
 
-            Peca pecaCapturada = Tabuleiro.RetirarPeca(posicaoDestino);
+            Peca pieceArrasted = Board.RemovePiece(positionDestiny);
             
-            if (pecaCapturada != null)
-                HashPecasCapturadas.Add(pecaCapturada);
+            if (pieceArrasted != null)
+                HashPiecesArrasted.Add(pieceArrasted);
                         
-            Tabuleiro.ColocarPeca(pecaOrigem, posicaoDestino);
+            Board.AddNewPiece(pieceOrigin, positionDestiny);
 
-            if (JogadaRoquePequeno(pecaOrigem, posicaoDestino, posicaoOrigem))
-                ExecutaRoquePequeno(posicaoOrigem);
+            if (SmallRoqueIsValid(pieceOrigin, positionDestiny, positionOrigin))
+                ExecuteSmallRoque(positionOrigin);
             
-            if (JogadaRoqueGrande(pecaOrigem, posicaoDestino, posicaoOrigem))
-                ExecutaRoqueGrande(posicaoOrigem);
+            if (BigRoqueIsValid(pieceOrigin, positionDestiny, positionOrigin))
+                ExecuteBigRoque(positionOrigin);
 
-            if (pecaOrigem is Peao)
-            {
-                if (posicaoOrigem.Coluna != posicaoDestino.Coluna && pecaCapturada == null)
-                {
-                    Posicao posP;
-                    if(pecaOrigem.Cor.Equals(Cor.Branca))
-                    {
-                        posP = new Posicao(posicaoDestino.Linha + 1, posicaoDestino.Coluna);
-                    }
-                    else
-                    {
-                        posP = new Posicao(posicaoDestino.Linha - 1, posicaoDestino.Coluna);
-                    }
-
-                    pecaCapturada = Tabuleiro.RetirarPeca(posP);
-                    HashPecasCapturadas.Add(pecaCapturada);
-                }
-            }
-
-            return pecaCapturada;
+            if (EnPassantIsValid(pieceOrigin, positionOrigin, positionDestiny, pieceArrasted))
+                ExecuteEnPassant(pieceOrigin, positionDestiny);
+           
+            return pieceArrasted;
         }
 
-        public void DesfazMovimento(Posicao posicaoOrigem, Posicao posicaoDestino, Peca pecaCapturada)
+        /// <summary>
+        /// Undo move when has one or more error 
+        /// </summary>
+        /// <param name="positionOrigin"></param>
+        /// <param name="positionDestiny"></param>
+        /// <param name="pieceArrasted"></param>
+        public void UndoMove(Posicao positionOrigin, Posicao positionDestiny, Peca pieceArrasted)
         {
-            Peca peca = Tabuleiro.RetirarPeca(posicao: posicaoDestino);
-            peca.DecrementarQtdMovimentos();
+            Peca piece = Board.RemovePiece(positionDestiny);
+            piece.DecreaseAmountMoves();
 
-            if (pecaCapturada != null)
+            if (pieceArrasted != null)
             {
-                Tabuleiro.ColocarPeca(pecaCapturada, posicaoDestino);
-                HashPecasCapturadas.Remove(pecaCapturada);
+                Board.AddNewPiece(pieceArrasted, positionDestiny);
+                HashPiecesArrasted.Remove(pieceArrasted);
             }
 
-            Tabuleiro.ColocarPeca(peca, posicaoOrigem);
+            Board.AddNewPiece(piece, positionOrigin);
 
-            if (JogadaRoquePequeno(peca, posicaoDestino, posicaoOrigem))
-                VoltarRoquePequeno(posicaoOrigem);
+            if (SmallRoqueIsValid(piece, positionDestiny, positionOrigin))
+                UndoSmallRoque(positionOrigin);
 
-            if (JogadaRoqueGrande(peca, posicaoDestino, posicaoOrigem))
-                VoltarRoqueGrande(posicaoOrigem);
+            if (BigRoqueIsValid(piece, positionDestiny, positionOrigin))
+                UndoBigRoque(positionOrigin);
 
-            if(peca is Peao)
-            {
-                if(posicaoOrigem.Coluna != posicaoDestino.Coluna && pecaCapturada == VulneravelEnPassant)
-                {
-                    Peca peao = Tabuleiro.RetirarPeca(posicaoDestino);
-                    Posicao posP;
-                    if(peca.Cor == Cor.Branca)
-                    {
-                        posP = new Posicao(3, posicaoDestino.Coluna);
-                    }
-                    else
-                    {
-                        posP = new Posicao(4, posicaoDestino.Coluna);
-                    }
-
-                    Tabuleiro.ColocarPeca(peao, posP);
-                }
-            }
-        }
-
-        public void RealizaJogada(Posicao origem, Posicao destino)
-        {
-            Peca pecaCapturada = ExecutaMovimento(origem, destino);
-
-            if (JogadorEstaEmXeque(JogadorAtual))
-            {
-                DesfazMovimento(origem, destino, pecaCapturada);
-                throw new TabuleiroException(MessageGame.msg_Voce_Nao_Pode_Se_Por_Em_Xeque);
-            }
-
-            Peca peca = Tabuleiro.Peca(destino);
-
-            if(peca is Peao)
-            {
-                if(peca.Cor == Cor.Branca && destino.Linha == 0 ||
-                     peca.Cor == Cor.Preta && destino.Linha == 7)
-                {
-                    peca = Tabuleiro.RetirarPeca(destino);
-                    HashPecasEmJogo.Remove(peca);
-                    Peca dama = new Dama(Tabuleiro, peca.Cor);
-                    Tabuleiro.ColocarPeca(dama, destino);
-                    HashPecasEmJogo.Add(dama);
-                }
-            }
-
-            Xeque = JogadorEstaEmXeque(Adversaria(JogadorAtual));
-
-            if (Xeque && JogadaXequeMate(Adversaria(JogadorAtual)))
-            {
-                Terminada = true;
-                return;
-            }
-
-            Turno++;
-            MudaJogador();
-
+            if(PlayedEnPassant(piece, positionOrigin, positionDestiny, pieceArrasted))
+                UndoEnPassant(piece, positionDestiny);
             
-
-            if (peca is Peao && (destino.Linha.Equals(origem.Linha - 2) ||
-               destino.Linha.Equals(origem.Linha + 2)))
-            {
-                VulneravelEnPassant = peca;
-            }
-            else
-            {
-                VulneravelEnPassant = null;
-            }
         }
+
         #endregion
 
         #region "Jogada Especial"
-        private bool JogadaRoquePequeno(Peca pecaOrigem, Posicao posicaoDestino, Posicao posicaoOrigem)
+
+        #region "Small roque"
+        /// <summary>
+        /// Check if play Small Roque is valid
+        /// </summary>
+        /// <param name="pieceOrigin">piece of origin</param>
+        /// <param name="positionDestiny">position origin</param>
+        /// <param name="positionOrigin">position destini</param>
+        /// <returns>true if play is valid</returns>
+        private bool SmallRoqueIsValid(Peca pieceOrigin, Posicao positionDestiny, Posicao positionOrigin)
         {
-            return pecaOrigem is Rei && posicaoDestino.Coluna == posicaoOrigem.Coluna + 2;
+            return pieceOrigin is Rei && positionDestiny.Column == positionOrigin.Column + 2;
         }
         
-        private void ExecutaRoquePequeno(Posicao posicaoOrigem)
+        /// <summary>
+        /// Excute play small roque
+        /// </summary>
+        /// <param name="positionOrigin">position oirigin of piece</param>
+        private void ExecuteSmallRoque(Posicao positionOrigin)
         {
-            Posicao origem = new Posicao(posicaoOrigem.Linha, posicaoOrigem.Coluna + 3);
-            Posicao destino = new Posicao(posicaoOrigem.Linha, posicaoOrigem.Coluna + 1);
-            Peca peca = Tabuleiro.RetirarPeca(origem);
-            peca.IncrementarQtdMovimentos();
-            Tabuleiro.ColocarPeca(peca, destino);
+            Posicao origin = new Posicao(positionOrigin.Line, positionOrigin.Column + 3);
+            Posicao destiny = new Posicao(positionOrigin.Line, positionOrigin.Column + 1);
+            Peca piece = Board.RemovePiece(origin);
+            piece.IncrementAmountMoves();
+            Board.AddNewPiece(piece, destiny);
         }
 
-        private void VoltarRoquePequeno(Posicao posicaoOrigem)
+        /// <summary>
+        /// Undo play small roque
+        /// </summary>
+        /// <param name="positionOrigin">position origin of piece</param>
+        private void UndoSmallRoque(Posicao positionOrigin)
         {
-            Posicao origem = new Posicao(posicaoOrigem.Linha, posicaoOrigem.Coluna + 3);
-            Posicao destino = new Posicao(posicaoOrigem.Linha, posicaoOrigem.Coluna + 1);
-            Peca peca = Tabuleiro.RetirarPeca(destino);
-            peca.DecrementarQtdMovimentos();
-            Tabuleiro.ColocarPeca(peca, origem);
+            Posicao origin = new Posicao(positionOrigin.Line, positionOrigin.Column + 3);
+            Posicao destiny = new Posicao(positionOrigin.Line, positionOrigin.Column + 1);
+            Peca piece = Board.RemovePiece(destiny);
+            piece.DecreaseAmountMoves();
+            Board.AddNewPiece(piece, origin);
+        }
+        #endregion
+
+        #region "big roque"
+        /// <summary>
+        /// check if play big roque is valid
+        /// </summary>
+        /// <param name="pieceOrigin">piece origin</param>
+        /// <param name="positionDestiny">position destiny of piece</param>
+        /// <param name="positionOrigin">position origin of piece</param>
+        /// <returns>true if play big roque is valid</returns>
+        private bool BigRoqueIsValid(Peca pieceOrigin, Posicao positionDestiny, Posicao positionOrigin)
+        {
+            return pieceOrigin is Rei && positionDestiny.Column == positionOrigin.Column - 2;
         }
 
-        private bool JogadaRoqueGrande(Peca pecaOrigem, Posicao posicaoDestino, Posicao posicaoOrigem)
+        /// <summary>
+        /// Excute play big roque
+        /// </summary>
+        /// <param name="positionOrigin">position oirigin of piece</param>
+        private void ExecuteBigRoque(Posicao positionOrigin)
         {
-            return pecaOrigem is Rei && posicaoDestino.Coluna == posicaoOrigem.Coluna - 2;
+            Posicao origin = new Posicao(positionOrigin.Line, positionOrigin.Column - 4);
+            Posicao destiny = new Posicao(positionOrigin.Line, positionOrigin.Column - 1);
+            Peca piece = Board.RemovePiece(origin);
+            piece.IncrementAmountMoves();
+            Board.AddNewPiece(piece, destiny);
         }
 
-        private void ExecutaRoqueGrande(Posicao posicaoOrigem)
+        /// <summary>
+        /// Undo play big roque
+        /// </summary>
+        /// <param name="positionOrigin">position origin of piece</param>
+        private void UndoBigRoque(Posicao positionOrigin)
         {
-            Posicao origem = new Posicao(posicaoOrigem.Linha, posicaoOrigem.Coluna - 4);
-            Posicao destino = new Posicao(posicaoOrigem.Linha, posicaoOrigem.Coluna - 1);
-            Peca peca = Tabuleiro.RetirarPeca(origem);
-            peca.IncrementarQtdMovimentos();
-            Tabuleiro.ColocarPeca(peca, destino);
+            Posicao origin = new Posicao(positionOrigin.Line, positionOrigin.Column - 4);
+            Posicao destiny = new Posicao(positionOrigin.Line, positionOrigin.Column - 1);
+            Peca piece = Board.RemovePiece(destiny);
+            piece.DecreaseAmountMoves();
+            Board.AddNewPiece(piece, origin);
         }
-        
-        private void VoltarRoqueGrande(Posicao posicaoOrigem)
+        #endregion
+
+        #region "EnPassant"
+        /// <summary>
+        /// Check if play EnPassant is valid
+        /// </summary>
+        /// <param name="pieceOrigin"></param>
+        /// <param name="positionOrigin"></param>
+        /// <param name="positionDestiny"></param>
+        /// <param name="pieceArrasted"></param>
+        /// <returns></returns>
+        private bool EnPassantIsValid(Peca pieceOrigin, Posicao positionOrigin, Posicao positionDestiny, Peca pieceArrasted)
         {
-            Posicao origem = new Posicao(posicaoOrigem.Linha, posicaoOrigem.Coluna - 4);
-            Posicao destino = new Posicao(posicaoOrigem.Linha, posicaoOrigem.Coluna - 1);
-            Peca peca = Tabuleiro.RetirarPeca(destino);
-            peca.DecrementarQtdMovimentos();
-            Tabuleiro.ColocarPeca(peca, origem);
+            return pieceOrigin is Peao && positionOrigin.Column != positionDestiny.Column && pieceArrasted == null;
         }
+
+        /// <summary>
+        /// Execute move EnPassant
+        /// </summary>
+        /// <param name="pieceOrigin"></param>
+        /// <param name="positionDestiny"></param>
+        private void ExecuteEnPassant(Peca pieceOrigin, Posicao positionDestiny)
+        {
+            Posicao position = pieceOrigin.Color.Equals(Cor.Branca) ?
+                               new Posicao(positionDestiny.Line + 1, positionDestiny.Column):
+                               new Posicao(positionDestiny.Line - 1, positionDestiny.Column);
+            
+            Peca pecaCapturada = Board.RemovePiece(position);
+            HashPiecesArrasted.Add(pecaCapturada);
+        }
+
+        /// <summary>
+        /// check if current play is EnPassant
+        /// </summary>
+        /// <param name="piece"></param>
+        /// <param name="positionOrigin"></param>
+        /// <param name="positionDestiny"></param>
+        /// <param name="pieceArrasted"></param>
+        private bool PlayedEnPassant(Peca piece, Posicao positionOrigin, Posicao positionDestiny, Peca pieceArrasted)
+        {
+            return piece is Peao && positionOrigin.Column!= positionDestiny.Column && pieceArrasted == PieceEnPassant;
+        }
+
+        /// <summary>
+        /// undo the move EnPassant
+        /// </summary>
+        /// <param name="piece"></param>
+        /// <param name="positionDestiny"></param>
+        private void UndoEnPassant(Peca piece, Posicao positionDestiny)
+        {
+            Peca peao = Board.RemovePiece(positionDestiny);
+           
+            Posicao position = piece.Color == Cor.Branca ?
+                               new Posicao(3, positionDestiny.Column):
+                               new Posicao(4, positionDestiny.Column);
+
+            Board.AddNewPiece(peao, position);
+        }
+
+        /// <summary>
+        /// check if piece is vulnerable EnPassant
+        /// </summary>
+        /// <param name="piece"></param>
+        /// <param name="positionOrigin"></param>
+        /// <param name="positionDestiny"></param>
+        /// <returns></returns>
+        private Peca IsVulnarableEnPassant(Peca piece, Posicao positionOrigin, Posicao positionDestiny) 
+        {
+            return piece is Peao 
+                   && (
+                         positionDestiny.Line.Equals(positionOrigin.Line - 2) || 
+                         positionDestiny.Line.Equals(positionOrigin.Line + 2)
+                      ) ? piece : null;
+
+        }
+        #endregion
+
+        #region "Promotion Play"
+        /// <summary>
+        /// check if play is promotion
+        /// </summary>
+        /// <param name="piece"></param>
+        /// <param name="destiny"></param>
+        /// <returns>true if is promotion</returns>
+        private bool PromotionPlay(Peca piece, Posicao destiny)
+        {
+            return piece.Color == Cor.Branca && destiny.Line == 0 ||
+                   piece.Color == Cor.Preta && destiny.Line == 7;
+        }
+
+        /// <summary>
+        /// execute promotion play
+        /// </summary>
+        /// <param name="destiny"></param>
+        private void ExecutePlayPromotion(Posicao destiny)
+        {
+            Peca piece = Board.RemovePiece(destiny);
+            HashPiecesInGame.Remove(piece);
+            
+            Peca dama = new Dama(Board, piece.Color);
+            Board.AddNewPiece(dama, destiny);
+            
+            HashPiecesInGame.Add(dama);
+        }
+        #endregion
 
         #endregion
-        
+
         #region "Valida Check Mate"
         /// <summary>
         /// check if player is check mate
@@ -226,17 +347,17 @@ namespace Xadrez
         /// <param name="cor"></param>
         /// <returns>true if check mate</returns>
         /// <exception cref="TabuleiroException">not have rei in game</exception>
-        public bool JogadorEstaEmXeque(Cor cor)
+        public bool PlayerIsXeque(Cor cor)
         {
             Peca rei = GetRei(cor);
 
             if (rei == null)
                 throw new TabuleiroException(MessageGame.msg_Nao_Possui_Rei_Da_Cor_X0_Em_Jogo.ToFormat(cor));
 
-            foreach (Peca peca in PecasEmJogo(Adversaria(cor)))
+            foreach (Peca piece in GetPiecesInGame(EnemyColor(cor)))
             {
-                bool[,] mMovimentosPossiveis = peca.MovimentosPossiveis();
-                if (mMovimentosPossiveis[rei.Posicao.Linha, rei.Posicao.Coluna])
+                bool[,] mPossibleMoves = piece.PossibleMove();
+                if (mPossibleMoves[rei.Position.Line, rei.Position.Column])
                     return true;
             }
 
@@ -248,22 +369,24 @@ namespace Xadrez
         /// </summary>
         /// <param name="cor"></param>
         /// <returns>true if Xeque Mate</returns>
-        public bool JogadaXequeMate(Cor cor)
+        public bool PlayIsXequeMate(Cor color)
         {
-            foreach (Peca peca in PecasEmJogo(cor))
+            foreach (Peca piece in GetPiecesInGame(color))
             {
-                bool[,] mMovimentosPossiveis = peca.MovimentosPossiveis();
-                for (int linha = 0; linha < Tabuleiro.Linhas; linha++)
+                bool[,] mPossibleMove = piece.PossibleMove();
+                for (int line = 0; line < Board.Line; line ++)
                 {
-                    for (int coluna = 0; coluna < Tabuleiro.Colunas; coluna++)
+                    for (int column = 0; column < Board.Column; column ++)
                     {
-                        if (mMovimentosPossiveis[linha, coluna])
+                        if (mPossibleMove[line, column])
                         {
-                            Posicao posicaoOrigem = peca.Posicao;
-                            Posicao posicaoDestino = new Posicao(linha, coluna);
-                            Peca pecaCapturada = ExecutaMovimento(posicaoOrigem, posicaoDestino);
-                            bool xeque = JogadorEstaEmXeque(cor);
-                            DesfazMovimento(posicaoOrigem, posicaoDestino, pecaCapturada);
+                            Posicao positionOrigin = piece.Position;
+                            Posicao positionDestiny = new Posicao(line, column);
+                            Peca pieceArrasted = ExecuteMove(positionOrigin, positionDestiny);
+                            
+                            bool xeque = PlayerIsXeque(color);
+                            UndoMove(positionOrigin, positionDestiny, pieceArrasted);
+                            
                             if (!xeque)
                             {
                                 return false;
@@ -285,64 +408,65 @@ namespace Xadrez
         /// </summary>
         /// <param name="inputPosicao">player position origin setted</param>
         /// <returns></returns>
-        public ResultInfo<Posicao> ValidarPosicaoDeOrigem(string inputPosicao)
+        public ResultInfo<Posicao> PositionOriginIsValid(string inputPosicao)
         {
             ResultInfo<Posicao> result = new ResultInfo<Posicao>();
 
-            if (ValidaPosicao(inputPosicao))
+            if (!PositionIsValid(inputPosicao))
             {
                 result.Exception = new TabuleiroException(MessageGame.msg_Posicao_Invalida);
                 return result;
             }
                         
-            var posicaoXadrez = new PosicaoXadrez(coluna: inputPosicao[0], linha : int.Parse(inputPosicao[1] + ""));
-            var posicao = posicaoXadrez.GetPosicao();
+            var positionChess = new PosicaoXadrez(inputPosicao[0], int.Parse(inputPosicao[1] + ""));
+            var position = positionChess.GetPosition();
 
-            if (!ExistePecaNaPosicao(posicao))
+            if (!HasPieceInPosition(position))
             {
                 result.Exception = new TabuleiroException(MessageGame.msg_Nao_Existe_Peca_Na_Posicao_Origem);
                 return result;
             }
 
-            Peca peca = Tabuleiro.Peca(posicao);
+            Peca peca = Board.GetPiece(position);
 
-            if (JogadorAtual != peca.Cor)
+            if (CurrentPlayer != peca.Color)
             {
                 result.Exception = new TabuleiroException(MessageGame.msg_A_Peca_De_Origem_Escolhida_Nao_E_Sua);
                 return result;
             }
 
-            if (!peca.ExisteMovimentosPossiveis())
+            if (!peca.HasPossibleMoves())
             {
                 result.Exception = new TabuleiroException(MessageGame.msg_Nao_Ha_Movimentos_Possiveis_Para_A_Peca_De_Origem_Escolhida);
                 return result;
             }
 
-            result.Item = posicao;
+            result.Item = position;
             return result;
         }
         #endregion
 
         #region "Validar posicao de destino
-        public ResultInfo<Posicao> validarPosicaoDeDestino(Posicao origem, string inputDestino)
+        public ResultInfo<Posicao> PositionDestinyIsValid(Posicao positionOrigin, string inputDestino)
         {
             var result = new ResultInfo<Posicao>();
-            if (ValidaPosicao(inputDestino))
+
+            if (!PositionIsValid(inputDestino))
             {
                 result.Exception = new TabuleiroException(MessageGame.msg_Posicao_Invalida);
                 return result;
             }
                 
-            var destinoXadrez = new PosicaoXadrez(coluna: inputDestino[0], linha: int.Parse(inputDestino[1] + ""));
-            var posicaoDestino = destinoXadrez.GetPosicao();
+            var detinyChess = new PosicaoXadrez(inputDestino[0], int.Parse(inputDestino[1] + ""));
+            var positionDestiny = detinyChess.GetPosition();
 
-            if (!Tabuleiro.Peca(origem).MovimentoPossivel(posicaoDestino))
+            if (!Board.GetPiece(positionOrigin).MoveIsPossble(positionDestiny))
             {
                 result.Exception = new TabuleiroException(MessageGame.msg_Posicao_De_Destino_Invalida);
                 return result;
             }
 
-            result.Item = posicaoDestino;
+            result.Item = positionDestiny;
             return result;
         }
         #endregion
@@ -352,11 +476,11 @@ namespace Xadrez
         /// </summary>
         /// <param name="inputPosicao">postion inputed by user</param>
         /// <returns>true is ok</returns>
-        private bool ValidaPosicao(string inputPosicao)
+        private bool PositionIsValid(string inputPosicao)
         {
-            return inputPosicao.Length != 2 ||
-                   inputPosicao.Substring(0, 1).NotIn(CABECALHO_COLUNAS_TABULEIRO.Split(' '))||
-                   !int.TryParse(inputPosicao.Substring(1, 1), out _);
+            return inputPosicao.Length == 2 &&
+                   inputPosicao.Substring(0, 1).In(Tela.BOARD_HEADER.Split(' '))&&
+                   int.TryParse(inputPosicao.Substring(1, 1), out _);
         }
 
         /// <summary>
@@ -364,9 +488,9 @@ namespace Xadrez
         /// </summary>
         /// <param name="posicao">postion inputed by user</param>
         /// <returns>true is ok</returns>
-        private bool ExistePecaNaPosicao(Posicao posicao)
+        private bool HasPieceInPosition(Posicao position)
         {
-            return Tabuleiro.Peca(posicao) != null;
+            return Board.GetPiece(position) != null;
         }
 
         #endregion
@@ -375,9 +499,9 @@ namespace Xadrez
         /// <summary>
         /// change player game
         /// </summary>
-        private void MudaJogador()
+        private void ChangePlayer()
         {
-            JogadorAtual = JogadorAtual.Equals(Cor.Branca) ? Cor.Preta : Cor.Branca;
+            CurrentPlayer = CurrentPlayer.Equals(Cor.Branca) ? Cor.Preta : Cor.Branca;
         }
         #endregion
 
@@ -387,16 +511,16 @@ namespace Xadrez
         /// </summary>
         /// <param name="cor">cor osf current player</param>
         /// <returns>Return captured pieces</returns>
-        public HashSet<Peca> PecasCapturadas(Cor cor)
+        public HashSet<Peca> GetArrastedPieces(Cor cor)
         {
-            HashSet<Peca> listaPecasCapturadas = new HashSet<Peca>();
+            HashSet<Peca> hashPlayerPieces = new HashSet<Peca>();
             
-            foreach (Peca peca in HashPecasCapturadas.Where(x => x.Cor.Equals(cor)).ToList())
+            foreach (Peca piece in HashPiecesArrasted.Where(x => x.Color.Equals(cor)).ToList())
             {
-                listaPecasCapturadas.Add(peca);
+                hashPlayerPieces.Add(piece);
             }
 
-            return listaPecasCapturadas;
+            return hashPlayerPieces;
         }
         #endregion
 
@@ -406,19 +530,19 @@ namespace Xadrez
         /// </summary>
         /// <param name="cor"></param>
         /// <returns>Hash of pieces in game</returns>
-        public HashSet<Peca> PecasEmJogo(Cor cor)
+        public HashSet<Peca> GetPiecesInGame(Cor cor)
         {
-            HashSet<Peca> listaPecasJogador = new HashSet<Peca>();
+            HashSet<Peca> hashPlayerPieces = new HashSet<Peca>();
 
-            foreach (var peca in from Peca peca in HashPecasEmJogo
-                                 where peca.Cor.Equals(cor)
-                                 select peca)
+            foreach (var piecePlayer in from Peca piece in HashPiecesInGame
+                                        where piece.Color.Equals(cor)  
+                                        select piece)
             {
-                listaPecasJogador.Add(peca);
+                hashPlayerPieces.Add(piecePlayer);
             }
 
-            listaPecasJogador.ExceptWith(PecasCapturadas(cor));
-            return listaPecasJogador;
+            hashPlayerPieces.ExceptWith(GetArrastedPieces(cor));
+            return hashPlayerPieces;
         }
         #endregion
 
@@ -428,9 +552,9 @@ namespace Xadrez
         /// </summary>
         /// <param name="cor"></param>
         /// <returns></returns>
-        private Cor Adversaria(Cor cor)
+        private Cor EnemyColor(Cor color)
         {
-            return cor.Equals(Cor.Branca) ? Cor.Preta : Cor.Branca;
+            return color.Equals(Cor.Branca) ? Cor.Preta : Cor.Branca;
         }
         #endregion
 
@@ -442,57 +566,59 @@ namespace Xadrez
         /// <returns>Rei of cor</returns>
         private Peca GetRei(Cor cor)
         {
-            foreach (Peca x in PecasEmJogo(cor))
+            foreach (Peca piece in GetPiecesInGame(cor))
             {
-                if (x is Rei)
-                    return x;
+                if (piece is Rei)
+                    return piece;
             }
 
             return null;
         }
         #endregion
 
-        public void colocarNovaPeca(char coluna, int linha, Peca peca)
+        #region "Adicionar peca na partida"
+        public void SetNewPiece(char column, int line, Peca piece)
         {
-            Tabuleiro.ColocarPeca(peca, new PosicaoXadrez(coluna, linha).GetPosicao());
-            HashPecasEmJogo.Add(peca);
+            Board.AddNewPiece(piece, new PosicaoXadrez(column, line).GetPosition());
+            HashPiecesInGame.Add(piece);
         }
 
-        private void colocarPecas()
+        private void AddPieceInGame()
         {
-            colocarNovaPeca('A', 1, new Torre(Tabuleiro, Cor.Branca));
-            colocarNovaPeca('B', 1, new Cavalo(Tabuleiro, Cor.Branca));
-            colocarNovaPeca('C', 1, new Bispo(Tabuleiro, Cor.Branca));
-            colocarNovaPeca('D', 1, new Dama(Tabuleiro, Cor.Branca));
-            colocarNovaPeca('E', 1, new Rei(Tabuleiro, Cor.Branca, this));
-            colocarNovaPeca('F', 1, new Bispo(Tabuleiro, Cor.Branca));
-            colocarNovaPeca('G', 1, new Cavalo(Tabuleiro, Cor.Branca));
-            colocarNovaPeca('H', 1, new Torre(Tabuleiro, Cor.Branca));
-            colocarNovaPeca('A', 2, new Peao(Tabuleiro, Cor.Branca, this));
-            colocarNovaPeca('B', 2, new Peao(Tabuleiro, Cor.Branca, this));
-            colocarNovaPeca('C', 2, new Peao(Tabuleiro, Cor.Branca, this));
-            colocarNovaPeca('D', 2, new Peao(Tabuleiro, Cor.Branca, this));
-            colocarNovaPeca('E', 2, new Peao(Tabuleiro, Cor.Branca, this));
-            colocarNovaPeca('F', 2, new Peao(Tabuleiro, Cor.Branca, this));
-            colocarNovaPeca('G', 2, new Peao(Tabuleiro, Cor.Branca, this));
-            colocarNovaPeca('H', 2, new Peao(Tabuleiro, Cor.Branca, this));
+            SetNewPiece('A', 1, new Torre(Board, Cor.Branca));
+            SetNewPiece('B', 1, new Cavalo(Board, Cor.Branca));
+            SetNewPiece('C', 1, new Bispo(Board, Cor.Branca));
+            SetNewPiece('E', 1, new Dama(Board, Cor.Branca));
+            SetNewPiece('D', 1, new Rei(Board, Cor.Branca, this));
+            SetNewPiece('F', 1, new Bispo(Board, Cor.Branca));
+            SetNewPiece('G', 1, new Cavalo(Board, Cor.Branca));
+            SetNewPiece('H', 1, new Torre(Board, Cor.Branca));
+            SetNewPiece('A', 2, new Peao(Board, Cor.Branca, this));
+            SetNewPiece('B', 2, new Peao(Board, Cor.Branca, this));
+            SetNewPiece('C', 2, new Peao(Board, Cor.Branca, this));
+            SetNewPiece('D', 2, new Peao(Board, Cor.Branca, this));
+            SetNewPiece('E', 2, new Peao(Board, Cor.Branca, this));
+            SetNewPiece('F', 2, new Peao(Board, Cor.Branca, this));
+            SetNewPiece('G', 2, new Peao(Board, Cor.Branca, this));
+            SetNewPiece('H', 2, new Peao(Board, Cor.Branca, this));
 
-            colocarNovaPeca('A', 8, new Torre(Tabuleiro, Cor.Preta));
-            colocarNovaPeca('B', 8, new Cavalo(Tabuleiro, Cor.Preta));
-            colocarNovaPeca('C', 8, new Bispo(Tabuleiro, Cor.Preta));
-            colocarNovaPeca('D', 8, new Dama(Tabuleiro, Cor.Preta));
-            colocarNovaPeca('E', 8, new Rei(Tabuleiro, Cor.Preta, this));
-            colocarNovaPeca('F', 8, new Bispo(Tabuleiro, Cor.Preta));
-            colocarNovaPeca('G', 8, new Cavalo(Tabuleiro, Cor.Preta));
-            colocarNovaPeca('H', 8, new Torre(Tabuleiro, Cor.Preta));
-            colocarNovaPeca('A', 7, new Peao(Tabuleiro, Cor.Preta, this));
-            colocarNovaPeca('B', 7, new Peao(Tabuleiro, Cor.Preta, this));
-            colocarNovaPeca('C', 7, new Peao(Tabuleiro, Cor.Preta, this));
-            colocarNovaPeca('D', 7, new Peao(Tabuleiro, Cor.Preta, this));
-            colocarNovaPeca('E', 7, new Peao(Tabuleiro, Cor.Preta, this));
-            colocarNovaPeca('F', 7, new Peao(Tabuleiro, Cor.Preta, this));
-            colocarNovaPeca('G', 7, new Peao(Tabuleiro, Cor.Preta, this));
-            colocarNovaPeca('H', 7, new Peao(Tabuleiro, Cor.Preta, this));
+            SetNewPiece('A', 8, new Torre(Board, Cor.Preta));
+            SetNewPiece('B', 8, new Cavalo(Board, Cor.Preta));
+            SetNewPiece('C', 8, new Bispo(Board, Cor.Preta));
+            SetNewPiece('D', 8, new Dama(Board, Cor.Preta));
+            SetNewPiece('E', 8, new Rei(Board, Cor.Preta, this));
+            SetNewPiece('F', 8, new Bispo(Board, Cor.Preta));
+            SetNewPiece('G', 8, new Cavalo(Board, Cor.Preta));
+            SetNewPiece('H', 8, new Torre(Board, Cor.Preta));
+            SetNewPiece('A', 7, new Peao(Board, Cor.Preta, this));
+            SetNewPiece('B', 7, new Peao(Board, Cor.Preta, this));
+            SetNewPiece('C', 7, new Peao(Board, Cor.Preta, this));
+            SetNewPiece('D', 7, new Peao(Board, Cor.Preta, this));
+            SetNewPiece('E', 7, new Peao(Board, Cor.Preta, this));
+            SetNewPiece('F', 7, new Peao(Board, Cor.Preta, this));
+            SetNewPiece('G', 7, new Peao(Board, Cor.Preta, this));
+            SetNewPiece('H', 7, new Peao(Board, Cor.Preta, this));
         }
+        #endregion
     }
 }

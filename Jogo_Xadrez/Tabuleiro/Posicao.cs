@@ -4,27 +4,52 @@ namespace tabuleiro
 {
     class Posicao
     {
-        
-        public int Linha { get; set; }
-        public int Coluna { get; set; }
+        #region "Variaveis"
+        /// <summary>
+        /// Line Position
+        /// </summary>
+        public int Line { get; set; }
+        /// <summary>
+        /// Column Position
+        /// </summary>
+        public int Column { get; set; }
+        #endregion
 
-        public Posicao(int linha, int coluna)
+        #region "Construtor"
+        /// <summary>
+        /// Constructor Set line and position
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="column"></param>
+        public Posicao(int line, int column)
         {
-            Linha  = linha;
-            Coluna = coluna;
+            Line   = line;
+            Column = column;
         }
+        #endregion
 
-        public void DefinirValores(int linha, int coluna)
+        #region "Set Value"
+        /// <summary>
+        /// set line and column in position
+        /// </summary>
+        /// <param name="line">line of position</param>
+        /// <param name="column">column of position</param>
+        public void SetValue(int line, int column)
         {
-            Linha = linha;
-            Coluna = coluna;
+            Line = line;
+            Column = column;
         }
+        #endregion
 
+        #region "To String"
+        /// <summary>
+        /// To string class
+        /// </summary>
+        /// <returns>Line and Column</returns>
         public override string ToString()
         {
-            return Linha + ", " + Coluna;
+            return Line + ", " + Column;
         }
-
-
+        #endregion
     }
 }

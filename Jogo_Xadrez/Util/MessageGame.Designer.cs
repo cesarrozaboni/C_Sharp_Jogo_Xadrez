@@ -70,11 +70,38 @@ namespace Jogo_Xadrez.Util {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AGUARDANDO JOGADA: {0}.
+        /// </summary>
+        internal static string msg_Aguardando_Jogada_X0 {
+            get {
+                return ResourceManager.GetString("msg_Aguardando_Jogada_X0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to BRANCA: .
+        /// </summary>
+        internal static string msg_Branca {
+            get {
+                return ResourceManager.GetString("msg_Branca", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Destino:.
         /// </summary>
         internal static string msg_Destino {
             get {
                 return ResourceManager.GetString("msg_Destino", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to JA EXISTE UMA PEÇA NESTA POSIÇÃO.
+        /// </summary>
+        internal static string msg_Ja_Existe_Peca_Nesta_Posicao {
+            get {
+                return ResourceManager.GetString("msg_Ja_Existe_Peca_Nesta_Posicao", resourceCulture);
             }
         }
         
@@ -115,6 +142,15 @@ namespace Jogo_Xadrez.Util {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to PEÇAS CAPTURADAS.
+        /// </summary>
+        internal static string msg_Pecas_Capturadas {
+            get {
+                return ResourceManager.GetString("msg_Pecas_Capturadas", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to POSIÇÃO DE DESTINO INVALIDA.
         /// </summary>
         internal static string msg_Posicao_De_Destino_Invalida {
@@ -133,11 +169,56 @@ namespace Jogo_Xadrez.Util {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to PRETA: .
+        /// </summary>
+        internal static string msg_Preta {
+            get {
+                return ResourceManager.GetString("msg_Preta", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TURNO {0}.
+        /// </summary>
+        internal static string msg_Turno_X0 {
+            get {
+                return ResourceManager.GetString("msg_Turno_X0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VENCEDOR: {0}.
+        /// </summary>
+        internal static string msg_Vencedor_X0 {
+            get {
+                return ResourceManager.GetString("msg_Vencedor_X0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to VOCE NÃO PODE SE POR EM XEQUE.
         /// </summary>
         internal static string msg_Voce_Nao_Pode_Se_Por_Em_Xeque {
             get {
                 return ResourceManager.GetString("msg_Voce_Nao_Pode_Se_Por_Em_Xeque", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to XEQUE.
+        /// </summary>
+        internal static string msg_Xeque {
+            get {
+                return ResourceManager.GetString("msg_Xeque", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to XEQUEMATE!.
+        /// </summary>
+        internal static string msg_Xequemate {
+            get {
+                return ResourceManager.GetString("msg_Xequemate", resourceCulture);
             }
         }
     }

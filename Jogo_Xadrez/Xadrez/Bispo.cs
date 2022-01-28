@@ -4,52 +4,79 @@ namespace Xadrez
 {
     class Bispo : Peca
     {
-        public Bispo(Tabuleiro tabuleiro, Cor cor) : base(tabuleiro, cor)
+        #region "Construtor"
+        /// <summary>
+        /// Create new piece Bispo
+        /// </summary>
+        /// <param name="board">Board game</param>
+        /// <param name="colorPiece">color piece</param>
+        public Bispo(Tabuleiro board, Cor colorPiece) : base(board, colorPiece)
         {
         }
+        #endregion
 
+        #region "ToString"
+        /// <summary>
+        /// Get piece of class
+        /// </summary>
+        /// <returns>Piece bispo</returns>
         public override string ToString()
         {
             return PECA_BISPO;
         }
+        #endregion
 
-        private bool PodeMover(Posicao posicao)
+        #region "Movimentos Possiveis"
+        /// <summary>
+        /// can move to position
+        /// </summary>
+        /// <param name="position">position that check</param>
+        /// <returns>true if yes</returns>
+        private bool CanMove(Posicao position)
         {
-            Peca peca = Tabuleiro.Peca(posicao);
-            return peca == null || peca.Cor != base.Cor;
+            Peca peca = Board.GetPiece(position);
+            return peca == null || peca.Color != base.Color;
         }
 
-        public override bool[,] MovimentosPossiveis()
+        public override bool[,] PossibleMove()
         {
-            bool[,] mMovimentos = new bool[Tabuleiro.Linhas, Tabuleiro.Colunas];
-            
+            bool[,] mPossibleMove = new bool[Board.Line, Board.Column];
+
             //no
-            VerificarPosicoes(ref mMovimentos, -1, -1);
+            PositionIsValid(ref mPossibleMove, -1, -1);
             //ne
-            VerificarPosicoes(ref mMovimentos, -1, 1);
+            PositionIsValid(ref mPossibleMove, -1, 1);
             //so
-            VerificarPosicoes(ref mMovimentos, 1, 1);
+            PositionIsValid(ref mPossibleMove, 1, 1);
             //se
-            VerificarPosicoes(ref mMovimentos, 1, -1);
+            PositionIsValid(ref mPossibleMove, 1, -1);
 
-            return mMovimentos;
+            return mPossibleMove;
         }
 
-        private void VerificarPosicoes(ref bool [,] mMovimentos, int somaLinha, int somaColuna)
+        /// <summary>
+        /// Check if position is valid make increment of line and column
+        /// </summary>
+        /// <param name="mMove"></param>
+        /// <param name="addLine"></param>
+        /// <param name="addColumn"></param>
+        private void PositionIsValid(ref bool [,] mMove, int addLine, int addColumn)
         {
-            var posicao = new Posicao(0, 0);
-            posicao.DefinirValores(Posicao.Linha + somaLinha, Posicao.Coluna + somaColuna);
-            while (!Tabuleiro.PosicaoValida(posicao) && PodeMover(posicao))
+            var position = new Posicao(0, 0);
+            position.SetValue(Position.Line + addLine, Position.Column + addColumn);
+            while (Board.PositionIsValid(position) && CanMove(position))
             {
-                mMovimentos[posicao.Linha, posicao.Coluna] = true;
-                if (Tabuleiro.Peca(posicao) == null)
-                    break;
+                mMove[position.Line, position.Column] = true;
+                if (Board.GetPiece(position) == null)
+                {
+                    position.SetValue(position.Line + addLine, position.Column + addColumn);
+                    continue;
+                }
                 
-                if (Tabuleiro.Peca(posicao) != null && Tabuleiro.Peca(posicao).Cor != Cor)
+                if (Board.GetPiece(position) != null && Board.GetPiece(position).Color != Color)
                     break;
-                
-                posicao.DefinirValores(Posicao.Linha + somaLinha, Posicao.Coluna + somaColuna);
             }
         }
+        #endregion
     }
 }

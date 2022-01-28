@@ -3,153 +3,184 @@ using tabuleiro;
 using Xadrez;
 using System.Collections.Generic;
 using System.Text;
+using Jogo_Xadrez.Util;
 
 namespace Jogo_Xadrez
 {
     class Tela
     {
+        #region Variaveis"
         public const string SEM_PECA = "\u002D";
-        public const string CABECALHO_COLUNAS_TABULEIRO = "  A  B  C  D  E  F  G  H";
+        public const string BOARD_HEADER = "  A  B  C  D  E  F  G  H";
+        #endregion
 
+        #region "Start Game"
         /// <summary>
-        /// Inicia a partida de Xadrez
+        /// play game chess board
         /// </summary>
-        /// <param name="partida"></param>
-        public static void IniciarJogo(PartidaDeXadrez partida)
+        /// <param name="ChessGame"></param>
+        public static void PlayGame(PartidaDeXadrez ChessGame)
         {
-            ImprimirTabuleiro(partida.Tabuleiro);
+            PrinterBoard(ChessGame.Board, null);
 
             Console.WriteLine();
-            ImprimirPecasCapturadas(partida);
+            PrinterArrastedPieces(ChessGame);
 
             Console.WriteLine();
-            Console.WriteLine("Turno: " + partida.Turno);
-            if (!partida.Terminada)
+            Console.WriteLine(MessageGame.msg_Turno_X0.ToFormat(ChessGame.Turn));
+          
+            if (ChessGame.EndGame)
             {
-                Console.WriteLine("Agurdando Jogada: " + partida.JogadorAtual);
+                Console.WriteLine(MessageGame.msg_Xequemate);
+                Console.WriteLine(MessageGame.msg_Vencedor_X0.ToFormat(ChessGame.CurrentPlayer));
+                return;
+            }
+            
+            Console.WriteLine(MessageGame.msg_Aguardando_Jogada_X0.ToFormat(ChessGame.CurrentPlayer));
 
-                if (partida.Xeque)
-                {
-                    Console.WriteLine("Xeque!");
-                }
-            }
-            else
-            {
-                Console.WriteLine("XEQUEMATE!");
-                Console.WriteLine("Vencedor: " + partida.JogadorAtual);
-            }
+            if (ChessGame.Xeque)
+                Console.WriteLine(MessageGame.msg_Xeque);
+            
         }
 
+        #endregion
+
+        #region "Imprimir tabuleiro"
         /// <summary>
-        /// Imprime tabuleiro e peças
+        /// printer chess board with pieces
         /// </summary>
-        /// <param name="tabuleiro"></param>
-        public static void ImprimirTabuleiro(Tabuleiro tabuleiro)
+        /// <param name="board"></param>
+        /// <param name="position">if setted get possible move of piece</param>
+        public static void PrinterBoard(Tabuleiro board, Posicao position)
         {
-            for (int linha = 0; linha < tabuleiro.Linhas; linha++)
+            PrinterHeaderColumn();
+                        
+            bool[,] mPosssibleMove = null;
+            if (position != null)
             {
-                ImprimeCabecalhoLinha(linha, tabuleiro);
-                for (int coluna = 0; coluna < tabuleiro.Colunas; coluna++)
+                Peca piece = board.GetPiece(position);
+                mPosssibleMove = piece.PossibleMove();
+            }
+
+            for (int line = 0; line < board.Line; line++)
+            {
+                PrinterHeaderLine(line, board);
+                for (int column = 0; column < board.Column; column ++)
                 {
-                    TrocarCorConsole(background: ConsoleColor.Black,
-                        foreground: tabuleiro.Peca(linha, coluna) == null ? ConsoleColor.Gray : tabuleiro.Peca(linha, coluna).Cor.Equals(Cor.Branca) ? ConsoleColor.Gray : ConsoleColor.DarkYellow);
-                    ImprimirPeca(tabuleiro.Peca(linha, coluna));
+                    ChangeColorConsole(background: position != null && 
+                                                   mPosssibleMove[line, column]?
+                                                   board.GetPiece(new Posicao(line, column)) != null ?
+                                                   ConsoleColor.Red :
+                                                   ConsoleColor.DarkGray:
+                                                   ConsoleColor.Black,
+                                       foreground: board.GetPiece(new Posicao(line, column)) != null && 
+                                                   !board.GetPiece(new Posicao(line, column)).Color.Equals(Cor.Branca)?
+                                                   ConsoleColor.DarkYellow:
+                                                   ConsoleColor.Gray);
+
+                    PrinterPiece(board.GetPiece(new Posicao(line, column)));
                 }
                 Console.WriteLine();
             }
 
-            TrocarCorConsole(ConsoleColor.DarkGray);
-            Console.Write(CABECALHO_COLUNAS_TABULEIRO);
-            TrocarCorConsole();
+            PrinterHeaderColumn();
         }
 
-        private static void ImprimeCabecalhoLinha(int linha, Tabuleiro tabuleiro)
+        #region "Imprimir cabeçalho coluna"
+        /// <summary>
+        /// printer number line chess board
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="board"></param>
+        private static void PrinterHeaderColumn()
         {
-            TrocarCorConsole(ConsoleColor.DarkGray);
-            Console.Write(tabuleiro.Linhas - linha + string.Empty.Space());
-            TrocarCorConsole();
+            ChangeColorConsole(ConsoleColor.Magenta);
+            Console.Write(BOARD_HEADER);
+            ChangeColorConsole();
+            Console.WriteLine();
         }
+        #endregion
 
-        public static void ImprimirMovimentosPossiveis(Tabuleiro tabuleiro, Posicao posicao)
+        #region "Imprimir Cabeçalho de linha"
+        /// <summary>
+        /// printer number line chess board
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="board"></param>
+        private static void PrinterHeaderLine(int line, Tabuleiro board)
         {
-            Peca peca = tabuleiro.Peca(posicao);
-            bool[,] mPosicoesPossiveis = peca.MovimentosPossiveis();
+            ChangeColorConsole(ConsoleColor.Magenta);
+            Console.Write(board.Line - line + string.Empty.Space());
+            ChangeColorConsole();
+        }
+        #endregion
 
-            for (int linha = 0; linha < tabuleiro.Linhas; linha++)
-            {
-                ImprimeCabecalhoLinha(linha, tabuleiro);
-                for (int coluna = 0; coluna < tabuleiro.Colunas; coluna++)
-                {
-                    TrocarCorConsole(background: mPosicoesPossiveis[linha, coluna] ? ConsoleColor.DarkGray : ConsoleColor.Black, 
-                        foreground: tabuleiro.Peca(linha, coluna) == null ? ConsoleColor.Gray : tabuleiro.Peca(linha, coluna).Cor.Equals(Cor.Branca) ? ConsoleColor.Gray : ConsoleColor.DarkYellow);
-                    ImprimirPeca(tabuleiro.Peca(linha, coluna));
-                }
+        #endregion
 
-                Console.WriteLine();
-            }
-            Console.Write(CABECALHO_COLUNAS_TABULEIRO);
-            TrocarCorConsole();
+        #region "Tela complementar"
+        /// <summary>
+        /// Printer arrasted pieces in the game
+        /// </summary>
+        /// <param name="chessGame"></param>
+        public static void PrinterArrastedPieces(PartidaDeXadrez chessGame)
+        {
+            Console.WriteLine(MessageGame.msg_Pecas_Capturadas);
+            
+            Console.Write(MessageGame.msg_Branca);
+            var arrastedWhite = GetArrasted(chessGame.GetArrastedPieces(Cor.Branca));
+            Console.Write($"[{ arrastedWhite }]");
+            Console.WriteLine();
+
+            Console.Write(MessageGame.msg_Preta);
+            ChangeColorConsole(foreground: ConsoleColor.Yellow);
+            var arrastedBlack = GetArrasted(chessGame.GetArrastedPieces(Cor.Preta));
+            Console.Write($"[{ arrastedBlack }]");
+            Console.WriteLine();
+
+            ChangeColorConsole();
         }
 
         /// <summary>
-        /// input posição de origem e destino
+        /// get arrasted pieces
         /// </summary>
-        /// <returns></returns>
-        /// <exception cref="TabuleiroException"></exception>
-
-
-       
-
-        public static void ImprimirPecasCapturadas(PartidaDeXadrez partida)
-        {
-            Console.WriteLine("Peças capturadas:");
-            Console.Write("Brancas: ");
-            imprimirConjunto(partida.PecasCapturadas(Cor.Branca));
-            Console.WriteLine();
-            Console.Write("Pretas: ");
-            ConsoleColor aux = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            imprimirConjunto(partida.PecasCapturadas(Cor.Preta));
-            Console.ForegroundColor = aux;
-            Console.WriteLine();
-        }
-
-        public static void imprimirConjunto(HashSet<Peca> pecasCapturadas)
+        /// <param name="pecasCapturadas"></param>
+        /// <returns>string with pieces of color arrasted</returns>
+        public static StringBuilder GetArrasted(HashSet<Peca> piecesArrasted)
         {
             StringBuilder capturadas = new StringBuilder();
 
-            foreach (Peca x in pecasCapturadas)
-                capturadas.Append(x.ToString().Space());
-            
-            Console.Write($"[{ capturadas }]");
+            foreach (Peca piece in piecesArrasted)
+                capturadas.Append(piece.ToString().Space());
+
+            return capturadas;
         }
 
-        public static void ImprimirPeca(Peca peca)
+        /// <summary>
+        /// Printer piece
+        /// </summary>
+        /// <param name="piece"></param>
+        public static void PrinterPiece(Peca piece)
         {
-            if (peca == null)
-            {
-                ImprimirPosicaoVazia();
-                return;
-            }
-            Console.Write(peca);
+            if (piece == null)
+                Console.Write(SEM_PECA.Space());
+            else
+                Console.Write(piece);
+
             Console.Write(string.Empty.Space());
         }
 
-        private static void ImprimirPosicaoVazia()
-        {
-            Console.Write(SEM_PECA.Space());
-            Console.Write(string.Empty.Space());
-        }
-
+  
         /// <summary>
         /// Troca a cor do Console
         /// </summary>
         /// <param name="fundo"></param>
         /// <param name="caracter"></param>
-        private static void TrocarCorConsole(ConsoleColor background = ConsoleColor.Black, ConsoleColor foreground = ConsoleColor.Gray)
+        private static void ChangeColorConsole(ConsoleColor background = ConsoleColor.Black, ConsoleColor foreground = ConsoleColor.Gray)
         {
             Console.BackgroundColor = background;
             Console.ForegroundColor = foreground;
         }
+        
+        #endregion
     }
 }

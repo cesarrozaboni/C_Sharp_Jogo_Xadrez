@@ -4,54 +4,63 @@ namespace Xadrez
 {
     class Torre : Peca
     {
-        public Torre(Tabuleiro tab, Cor cor) : base(tab, cor)
+
+        #region "Construtor"
+        /// <summary>
+        /// Create new piece Torre
+        /// </summary>
+        /// <param name="board">Board game</param>
+        /// <param name="colorPiece">color piece</param>
+        public Torre(Tabuleiro board, Cor color) : base(board, color)
         {
         }
+        #endregion
 
+        #region "Override To String"
         public override string ToString()
         {
             return PECA_TORRE;
         }
+        #endregion
 
-        private bool podeMover(Posicao pos)
+        #region "Movimentos Possiveis"
+        private bool CanMove(Posicao position)
         {
-            Peca peca = Tabuleiro.Peca(pos);
-            return peca == null || peca.Cor != Cor;
+            Peca peca = Board.GetPiece(position);
+            return peca == null || peca.Color != Color;
         }
 
-        public override bool[,] MovimentosPossiveis()
+        public override bool[,] PossibleMove()
         {
-            bool[,] mMovimentosPossiveis = new bool[Tabuleiro.Linhas, Tabuleiro.Colunas];
+            bool[,] mPossibleMove = new bool[Board.Line, Board.Column];
+
+            //up
+            MoveIsPossible(ref mPossibleMove, -1, 0);
+            //down
+            MoveIsPossible(ref mPossibleMove, 1, 0);
+            //rigth
+            MoveIsPossible(ref mPossibleMove, 0, 1);
+            //left
+            MoveIsPossible(ref mPossibleMove, 0, -1);
             
-            //acima
-            MovimentosPossiveis(ref mMovimentosPossiveis, -1, 0);
-            //abaixo
-            MovimentosPossiveis(ref mMovimentosPossiveis, 1, 0);
-            //direita
-            MovimentosPossiveis(ref mMovimentosPossiveis, 0, 1);
-            //esquerda
-            MovimentosPossiveis(ref mMovimentosPossiveis, 0, -1);
-            
-            return mMovimentosPossiveis;
+            return mPossibleMove;
         }
 
-        private void MovimentosPossiveis(ref bool[,]mMovimentosPossiveis, int somaLinha, int somaColuna)
+        private void MoveIsPossible(ref bool[,] mPossibleMove, int sumLine, int sumColumn)
         {
-            var posicao = new Posicao(0, 0);
+            var position = new Posicao(0, 0);
+            position.SetValue(Position.Line + sumLine, Position.Column + sumColumn);
 
-            posicao.DefinirValores(posicao.Linha + somaLinha, posicao.Coluna + somaColuna);
-
-            while (!Tabuleiro.PosicaoValida(posicao) && podeMover(posicao))
+            while (Board.PositionIsValid(position) && CanMove(position))
             {
-                mMovimentosPossiveis[posicao.Linha, posicao.Coluna] = true;
-
-                if (Tabuleiro.Peca(posicao) != null && Tabuleiro.Peca(posicao).Cor != Cor)
-                {
+                mPossibleMove[position.Line, position.Column] = true;
+                if (Board.GetPiece(position) != null && Board.GetPiece(position).Color != Color)
                     break;
-                }
-                posicao.Linha += somaLinha;
-                posicao.Coluna += somaColuna;
+                
+                position.SetValue(position.Line + sumLine, position.Column + sumColumn);
             }
         }
+        #endregion
+
     }
 }

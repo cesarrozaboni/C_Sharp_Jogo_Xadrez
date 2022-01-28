@@ -4,98 +4,111 @@ namespace Xadrez
 {
     class Rei : Peca
     {
-        private PartidaDeXadrez partida;
-
-        public Rei(Tabuleiro tab, Cor cor, PartidaDeXadrez partida) : base(tab, cor)
+        private readonly PartidaDeXadrez PartidaXadrez;
+        
+        #region "Construtor"
+        /// <summary>
+        /// Create new piece Rei
+        /// </summary>
+        /// <param name="board">Board game</param>
+        /// <param name="colorPiece">color piece</param>
+        public Rei(Tabuleiro board, Cor color, PartidaDeXadrez partida) : base(board, color)
         {
-            this.partida = partida;
+            this.PartidaXadrez = partida;
         }
+        #endregion
 
+        #region "Override To String"
         public override string ToString()
         {
             return PECA_REI;
         }
+        #endregion
 
-        private bool PodeMover(Posicao pos)
+        #region "Movimentos Possiveis"
+        private bool CanMove(Posicao position)
         {
-            Peca peca = Tabuleiro.Peca(pos);
-            return peca == null || peca.Cor != Cor;
+            Peca piece = Board.GetPiece(position);
+            return piece == null || piece.Color != Color;
         }
-
-        private bool TesteTorreParaRoque(Posicao pos)
+        
+        public override bool[,] PossibleMove()
         {
-            Peca peca = Tabuleiro.Peca(pos);
-            return peca is Torre && peca.Cor == Cor && peca.QtdMovimentos == 0;
-        }
-
-        public override bool[,] MovimentosPossiveis()
-        {
-            bool[,] mMovimentosPossiveis = new bool[Tabuleiro.Linhas, Tabuleiro.Colunas];
+            bool[,] mPossibleMoves = new bool[Board.Line, Board.Column];
             
             //acima
-            MovimentosPossiveis(ref mMovimentosPossiveis, -1, 0);
+            MovimentosPossiveis(ref mPossibleMoves, -1, 0);
             //ne
-            MovimentosPossiveis(ref mMovimentosPossiveis, -1, 1);
+            MovimentosPossiveis(ref mPossibleMoves, -1, 1);
             //direita
-            MovimentosPossiveis(ref mMovimentosPossiveis, 0, 1);
+            MovimentosPossiveis(ref mPossibleMoves, 0, 1);
             //se
-            MovimentosPossiveis(ref mMovimentosPossiveis, 1, 1);
+            MovimentosPossiveis(ref mPossibleMoves, 1, 1);
             //abaixo
-            MovimentosPossiveis(ref mMovimentosPossiveis, 1, 0);
+            MovimentosPossiveis(ref mPossibleMoves, 1, 0);
             //so
-            MovimentosPossiveis(ref mMovimentosPossiveis, 1, -1);
+            MovimentosPossiveis(ref mPossibleMoves, 1, -1);
             //esquerda
-            MovimentosPossiveis(ref mMovimentosPossiveis, 0, -1);
+            MovimentosPossiveis(ref mPossibleMoves, 0, -1);
             //no
-            MovimentosPossiveis(ref mMovimentosPossiveis, -1, -1);
+            MovimentosPossiveis(ref mPossibleMoves, -1, -1);
             
-            //#Jogada especial Roque
-            if(PodeJogarRoque())
+            if (RoqueIsValid())
             {
-                //#Roque Pequeno
-                Posicao posT1 = new Posicao(Posicao.Linha, Posicao.Coluna + 3);
+                if (MoveRoqueIsValid(new Posicao(Position.Line, Position.Column + 3)))
+                    PlaySmallRoque(ref mPossibleMoves);
 
-                if (TesteTorreParaRoque(posT1))
-                {
-                    Posicao posicao1 = new Posicao(Posicao.Linha, Posicao.Coluna + 1);
-                    Posicao posicao2 = new Posicao(Posicao.Linha, Posicao.Coluna + 2);
-
-                    if(Tabuleiro.Peca(posicao1) == null && Tabuleiro.Peca(posicao2) == null)
-                    {
-                        mMovimentosPossiveis[Posicao.Linha, Posicao.Coluna + 2] = true;
-                    }
-                }
-
-                //#Roque Grande
-                Posicao posT2 = new Posicao(Posicao.Linha, Posicao.Coluna - 4);
-
-                if (TesteTorreParaRoque(posT2))
-                {
-                    Posicao p1 = new Posicao(Posicao.Linha, Posicao.Coluna - 1);
-                    Posicao p2 = new Posicao(Posicao.Linha, Posicao.Coluna - 2);
-                    Posicao p3 = new Posicao(Posicao.Linha, Posicao.Coluna - 3);
-
-                    if (Tabuleiro.Peca(p1) == null && Tabuleiro.Peca(p2) == null && Tabuleiro.Peca(p3) == null)
-                    {
-                        mMovimentosPossiveis[Posicao.Linha, Posicao.Coluna - 2] = true;
-                    }
-                }
+                if (MoveRoqueIsValid(new Posicao(Position.Line, Position.Column - 4)))
+                    PlayBigRoque(ref mPossibleMoves);
             }
 
-            return mMovimentosPossiveis;
-        }
-        private void MovimentosPossiveis(ref bool[,]mMovimentosPossiveis, int somaLinha, int somaColuna)
-        {
-            Posicao posicao = new Posicao(0, 0);
-            posicao.DefinirValores(Posicao.Linha + somaLinha, Posicao.Coluna + somaColuna);
-
-            if(!Tabuleiro.PosicaoValida(posicao) && PodeMover(posicao))
-                    mMovimentosPossiveis[posicao.Linha, posicao.Coluna] = true;
+            return mPossibleMoves;
         }
 
-        private bool PodeJogarRoque()
+        #region "Jogada especial Roque"
+        private bool RoqueIsValid()
         {
-            return QtdMovimentos.Equals(0) && !partida.Xeque;
+            return AmountMoves.Equals(0) && !PartidaXadrez.Xeque;
         }
+
+        private bool MoveRoqueIsValid(Posicao position)
+        {
+            if (!Board.PositionIsValid(position))
+                return false;
+
+            Peca piece = Board.GetPiece(position);
+            return piece is Torre && piece.Color == Color && piece.AmountMoves == 0;
+        }
+
+        private void PlaySmallRoque(ref bool[,] mMove)
+        {
+            Posicao position1 = new Posicao(Position.Line, Position.Column + 1);
+            Posicao position2 = new Posicao(Position.Line, Position.Column + 2);
+
+            if (Board.GetPiece(position1) == null && Board.GetPiece(position2) == null)
+                mMove[Position.Line, Position.Column + 2] = true;
+        }
+
+        private void PlayBigRoque(ref bool[,] mMove)
+        {
+            Posicao p1 = new Posicao(Position.Line, Position.Column - 1);
+            Posicao p2 = new Posicao(Position.Line, Position.Column - 2);
+            Posicao p3 = new Posicao(Position.Line, Position.Column - 3);
+
+            if (Board.GetPiece(p1) == null && Board.GetPiece(p2) == null && Board.GetPiece(p3) == null)
+                mMove[Position.Line, Position.Column - 2] = true;
+        }
+        #endregion
+
+        private void MovimentosPossiveis(ref bool[,]mMove, int sumLine, int sumColumn)
+        {
+            Posicao position = new Posicao(0, 0);
+            position.SetValue(Position.Line + sumLine, Position.Column + sumColumn);
+
+            if(Board.PositionIsValid(position) && CanMove(position))
+                mMove[position.Line, position.Column] = true;
+        }
+
+        #endregion
     }
 }

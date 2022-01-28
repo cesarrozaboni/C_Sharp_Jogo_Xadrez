@@ -1,75 +1,120 @@
-﻿using System;
+﻿using Jogo_Xadrez.Util;
+using System;
 
 namespace tabuleiro
 {
+    /// <summary>
+    /// Operações de tabuleiro
+    /// </summary>
     class Tabuleiro
     {
-        public int Linhas { get; set; }
-        public int Colunas { get; set; }
-        private Peca[,] pecas;
+        #region "Variaveis"
+        /// <summary>
+        /// Line of board
+        /// </summary>
+        public int Line { get; set; }
+        /// <summary>
+        /// Column of board
+        /// </summary>
+        public int Column { get; set; }
+        /// <summary>
+        /// Pieces of board
+        /// </summary>
+        private Peca[,] Piece;
+        #endregion
 
-        public Tabuleiro(int linhas, int colunas)
+        #region "Construtor
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="line">line of board</param>
+        /// <param name="column">column of board</param>
+        public Tabuleiro(int line, int column)
         {
-            Linhas  = linhas;
-            Colunas = colunas;
-            pecas   = new Peca[linhas, colunas];
+            Line   = line;
+            Column = column;
+            Piece = new Peca[line, column];
+        }
+        #endregion
+
+        #region "Operaçoes Peça"
+        /// <summary>
+        /// Get peca in position of board
+        /// </summary>
+        /// <param name="line">line board</param>
+        /// <param name="column">column board</param>
+        /// <returns>return piece of the position of board</returns>
+        public Peca GetPiece(Posicao position)
+        {
+            return Piece[position.Line, position.Column];
         }
 
-        public Peca Peca(int linha, int coluna)
+        /// <summary>
+        /// Add new Piece in position of board
+        /// </summary>
+        /// <param name="piece">Piece that add</param>
+        /// <param name="position">position of new piece</param>
+        /// <exception cref="TabuleiroException">position is ocupped</exception>
+        public void AddNewPiece(Peca piece, Posicao position)
         {
-            return pecas[linha, coluna];
-        }
-
-        public Peca Peca(Posicao posicao)
-        {
-            return pecas[posicao.Linha, posicao.Coluna];
-        }
-
-        public void ColocarPeca(Peca peca, Posicao posicao)
-        {
-            if (ExistePeca(posicao))
+            if (HasPieceInPosition(position))
             {
-                throw new TabuleiroException("Ja Existe uma peça nesta posição");
+                throw new TabuleiroException(MessageGame.msg_Ja_Existe_Peca_Nesta_Posicao);
             }
-            pecas[posicao.Linha, posicao.Coluna] = peca;
-            peca.Posicao = posicao;
+
+            Piece[position.Line, position.Column] = piece;
+            piece.Position = position;
         }
 
         /// <summary>
         /// remove piece from board
         /// </summary>
-        /// <param name="posicao">position of piece</param>
+        /// <param name="position">position of piece</param>
         /// <returns>piece removed if have</returns>
-        public Peca RetirarPeca(Posicao posicao)
+        public Peca RemovePiece(Posicao position)
         {
-            if(Peca(posicao) == null)
-            {
+            if(GetPiece(position) == null)
                 return null;
-            }
-            Peca aux = Peca(posicao);
-            aux.Posicao = null;
-            pecas[posicao.Linha, posicao.Coluna] = null;
-            return aux;
+            
+            Peca pieceRemoved = GetPiece(position);
+            pieceRemoved.Position = null;
+            Piece[position.Line, position.Column] = null;
+            return pieceRemoved;
+        }
+        #endregion
+
+        #region "Operações Posição"
+        /// <summary>
+        /// Check if position is valid
+        /// </summary>
+        /// <param name="position"></param>
+        /// <returns>true if is valid</returns>
+        public bool PositionIsValid(Posicao position)
+        {
+            return position.Line >= 0 && position.Line < Line && position.Column >= 0 && position.Column < Column;
         }
 
-        public bool PosicaoValida(Posicao posicao)
+        /// <summary>
+        /// Check if position is valid
+        /// </summary>
+        /// <param name="position"></param>
+        /// <exception cref="TabuleiroException"></exception>
+        public void PositionIsValdWithException(Posicao position)
         {
-            return posicao.Linha < 0 || posicao.Linha >= Linhas || posicao.Coluna < 0 || posicao.Coluna >= Colunas;
+            if (!PositionIsValid(position))
+                throw new TabuleiroException(MessageGame.msg_Posicao_Invalida);
         }
-
-        public void ValidarPosicao(Posicao pos)
+        
+        /// <summary>
+        /// check if has piece in position of board
+        /// </summary>
+        /// <param name="position"></param>
+        /// <returns></returns>
+        public bool HasPieceInPosition(Posicao position)
         {
-            if (PosicaoValida(pos))
-            {
-                throw new TabuleiroException("Posição Invalida!");
-            }
+            PositionIsValdWithException(position);
+            return GetPiece(position) != null;
         }
-
-        public bool ExistePeca(Posicao pos)
-        {
-            ValidarPosicao(pos);
-            return Peca(pos) != null;
-        }
+        #endregion
     }
-
 }

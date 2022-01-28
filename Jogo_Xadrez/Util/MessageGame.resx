@@ -117,11 +117,20 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="msg_Aguardando_Jogada_X0" xml:space="preserve">
+    <value>AGUARDANDO JOGADA: {0}</value>
+  </data>
   <data name="msg_A_Peca_De_Origem_Escolhida_Nao_E_Sua" xml:space="preserve">
     <value>A PEÇA DE ORIGEM ESCOLHIDA NÃO É SUA!</value>
   </data>
+  <data name="msg_Branca" xml:space="preserve">
+    <value>BRANCA: </value>
+  </data>
   <data name="msg_Destino" xml:space="preserve">
     <value>Destino:</value>
+  </data>
+  <data name="msg_Ja_Existe_Peca_Nesta_Posicao" xml:space="preserve">
+    <value>JA EXISTE UMA PEÇA NESTA POSIÇÃO</value>
   </data>
   <data name="msg_Nao_Existe_Peca_Na_Posicao_Origem" xml:space="preserve">
     <value>NÃO EXISTE PEÇA NA POSIÇÃO DE ORIGEM!</value>
@@ -136,13 +145,32 @@
     <value>Origem: </value>
     <comment>jogador de origem</comment>
   </data>
+  <data name="msg_Pecas_Capturadas" xml:space="preserve">
+    <value>PEÇAS CAPTURADAS</value>
+  </data>
   <data name="msg_Posicao_De_Destino_Invalida" xml:space="preserve">
     <value>POSIÇÃO DE DESTINO INVALIDA</value>
   </data>
   <data name="msg_Posicao_Invalida" xml:space="preserve">
     <value>POSIÇÃO INVALIDA!</value>
   </data>
+  <data name="msg_Preta" xml:space="preserve">
+    <value>PRETA: </value>
+  </data>
+  <data name="msg_Turno_X0" xml:space="preserve">
+    <value>TURNO {0}</value>
+    <comment>numero do turno</comment>
+  </data>
+  <data name="msg_Vencedor_X0" xml:space="preserve">
+    <value>VENCEDOR: {0}</value>
+  </data>
   <data name="msg_Voce_Nao_Pode_Se_Por_Em_Xeque" xml:space="preserve">
     <value>VOCE NÃO PODE SE POR EM XEQUE</value>
+  </data>
+  <data name="msg_Xeque" xml:space="preserve">
+    <value>XEQUE</value>
+  </data>
+  <data name="msg_Xequemate" xml:space="preserve">
+    <value>XEQUEMATE!</value>
   </data>
 </root>

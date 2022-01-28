@@ -4,68 +4,77 @@ namespace Xadrez
 {
     class Dama : Peca
     {
-        public Dama(Tabuleiro tabuleiro, Cor cor) : base(tabuleiro, cor)
+        #region "Construtor"
+        /// <summary>
+        /// Create new piece Dama
+        /// </summary>
+        /// <param name="board">Board game</param>
+        /// <param name="colorPiece">color piece</param>
+        public Dama(Tabuleiro board, Cor colorPiece) : base(board, colorPiece)
         {
         }
+        #endregion
 
+        #region "To String"
+        /// <summary>
+        /// Get piece of class
+        /// </summary>
+        /// <returns>Piece Dama</returns>
         public override string ToString()
         {
             return PECA_DAMA;
         }
+        #endregion
 
-        private bool podeMover(Posicao pos)
+        #region "Movimentos Possiveis"
+        private bool CanMove(Posicao position)
         {
-            Peca peca = Tabuleiro.Peca(pos);
-            return peca == null || peca.Cor != Cor;
+            Peca peca = Board.GetPiece(position);
+            return peca == null || peca.Color != Color;
         }
 
-        public override bool[,] MovimentosPossiveis()
+        public override bool[,] PossibleMove()
         {
-            bool[,] mMovimentosPossiveis = new bool[Tabuleiro.Linhas, Tabuleiro.Colunas];
+            bool[,] mPossibleMove = new bool[Board.Line, Board.Column];
 
             //up
-            VerificarPosicoes(ref mMovimentosPossiveis, -1, 0);
+            GetPositionValid(ref mPossibleMove, -1, 0);
             //down
-            VerificarPosicoes(ref mMovimentosPossiveis, 1, 0);
+            GetPositionValid(ref mPossibleMove, 1, 0);
             //right
-            VerificarPosicoes(ref mMovimentosPossiveis, 0, 1);
+            GetPositionValid(ref mPossibleMove, 0, 1);
             //left
-            VerificarPosicoes(ref mMovimentosPossiveis, 0, -1);
+            GetPositionValid(ref mPossibleMove, 0, -1);
             //no
-            VerificarPosicoes(ref mMovimentosPossiveis, -1, -1);
+            GetPositionValid(ref mPossibleMove, -1, -1);
             //ne
-            VerificarPosicoes(ref mMovimentosPossiveis, -1, 1);
+            GetPositionValid(ref mPossibleMove, -1, 1);
             //so
-            VerificarPosicoes(ref mMovimentosPossiveis, 1, 1);
+            GetPositionValid(ref mPossibleMove, 1, 1);
             //se
-            VerificarPosicoes(ref mMovimentosPossiveis, 1, -1);
+            GetPositionValid(ref mPossibleMove, 1, -1);
             
-            return mMovimentosPossiveis;
+            return mPossibleMove;
         }
 
-        private void VerificarPosicoes(ref bool[,]mMovimentosPossiveis, int somaLinha, int somaColuna)
+        private void GetPositionValid(ref bool[,] mPossibleMove, int sumLine, int sumColumn)
         {
-            Posicao posicao = new Posicao(0, 0);
-            posicao.DefinirValores(Posicao.Linha + somaLinha, Posicao.Coluna + somaColuna);
+            Posicao position = new Posicao(0, 0);
+            position.SetValue(Position.Line + sumLine, Position.Column + sumColumn);
 
-            while (!Tabuleiro.PosicaoValida(posicao) && podeMover(posicao))
+            while (Board.PositionIsValid(position) && CanMove(position))
             {
-                mMovimentosPossiveis[posicao.Linha, posicao.Coluna] = true;
-                if (Tabuleiro.Peca(posicao) == null)
+                mPossibleMove[position.Line, position.Column] = true;
+                if (Board.GetPiece(position) == null)
                 {
-                    posicao.DefinirValores(posicao.Linha + somaLinha, posicao.Coluna + somaColuna);
+                    position.SetValue(position.Line + sumLine, position.Column + sumColumn);
                     continue;
                 }
-                    
-                
-                if (Tabuleiro.Peca(posicao) != null && Tabuleiro.Peca(posicao).Cor != Cor)
-                {
-                    posicao.DefinirValores(posicao.Linha + somaLinha, posicao.Coluna + somaColuna);
+                   
+                if (Board.GetPiece(position) != null && Board.GetPiece(position).Color != Color)
                     break;
-                }
-
-
             }
         }
+        #endregion
     }
 }

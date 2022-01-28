@@ -7,27 +7,25 @@ namespace Jogo_Xadrez
 {
     static class Program
     {
+        #region "Main"
         static void Main(string[] args)
         {
-            PartidaDeXadrez PartidaDeXadrez = new PartidaDeXadrez();
-            while (!PartidaDeXadrez.Terminada)
+            PartidaDeXadrez chessGame = new PartidaDeXadrez();
+            while (!chessGame.EndGame)
             {
-                IniciarPartida(PartidaDeXadrez);
+                PlayGame(chessGame);
 
-                if (ValidarOrigem(PartidaDeXadrez, out Posicao posicaoOrigem))
+                if (GetOrigin(chessGame, out Posicao positionOrigin))
                     continue;
                 
-                ImprimirMovimentosPossiveis(PartidaDeXadrez, posicaoOrigem);
+                PrinterPossibleMove(chessGame, positionOrigin);
 
-                Console.Write(MessageGame.msg_Destino);
-                string inputDestino = Console.ReadLine().ToUpper();
+                if (GetDestiny(positionOrigin, chessGame, out Posicao positionDestiny))
+                     continue;
 
-                var destino = PartidaDeXadrez.validarPosicaoDeDestino(posicaoOrigem, inputDestino);
-                if (GameUtil.ValidaRetorno(destino))
-                    continue;
                 try
                 {
-                    PartidaDeXadrez.RealizaJogada(posicaoOrigem, destino.Item);
+                    chessGame.PlayRound(positionOrigin, positionDestiny);
                 }
                 catch (TabuleiroException e)
                 {
@@ -36,35 +34,58 @@ namespace Jogo_Xadrez
                 }
             }
 
-            IniciarPartida(PartidaDeXadrez);
+            PlayGame(chessGame);
         }
+        #endregion
 
-        private static void IniciarPartida(PartidaDeXadrez PartidaDeXadrez)
+        #region "Play Game"
+        private static void PlayGame(PartidaDeXadrez PartidaDeXadrez)
         {
-            LimparTela();
-            Tela.IniciarJogo(PartidaDeXadrez);
+            ClearScreen();
+            Console.Title = "JOGO DE XADREZ";
+            Tela.PlayGame(PartidaDeXadrez);
         }
+        #endregion
 
-        private static void ImprimirMovimentosPossiveis(PartidaDeXadrez partida, Posicao posicao)
+        #region "Possible Move"
+        private static void PrinterPossibleMove(PartidaDeXadrez partida, Posicao posicao)
         {
-            LimparTela();
-            Tela.ImprimirMovimentosPossiveis(partida.Tabuleiro, posicao);
+            ClearScreen();
+            Tela.PrinterBoard(partida.Board, posicao);
             Console.WriteLine();
         }
+        #endregion
 
-        private static bool ValidarOrigem(PartidaDeXadrez PartidaDeXadrez, out Posicao posicao)
+        #region "Get Origin"
+        private static bool GetOrigin(PartidaDeXadrez PartidaDeXadrez, out Posicao posicao)
         {
             Console.Write(MessageGame.msg_Origem);
+            
             string inputOrigem = Console.ReadLine().ToUpper();
-            var result = PartidaDeXadrez.ValidarPosicaoDeOrigem(inputOrigem);
+            var result = PartidaDeXadrez.PositionOriginIsValid(inputOrigem);
             
             posicao = result.Item ?? result.Item;
             return GameUtil.ValidaRetorno(result);
         }
+        #endregion
 
-        private static void LimparTela()
+        #region "Get Destiny"
+        private static bool GetDestiny(Posicao positionOrigin, PartidaDeXadrez chessGame, out Posicao outPosition)
+        {
+            Console.Write(MessageGame.msg_Destino);
+            string inputDestino = Console.ReadLine().ToUpper();
+
+            var result = chessGame.PositionDestinyIsValid(positionOrigin, inputDestino);
+            outPosition = result.Item ?? result.Item;
+            return GameUtil.ValidaRetorno(result);
+        }
+        #endregion
+
+        #region "Clear Screen"
+        private static void ClearScreen()
         {
             Console.Clear();
         }
+        #endregion
     }
 }

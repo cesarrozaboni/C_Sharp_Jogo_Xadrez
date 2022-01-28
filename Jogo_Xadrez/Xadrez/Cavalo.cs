@@ -4,57 +4,73 @@ namespace Xadrez
 {
     class Cavalo : Peca
     {
-        public Cavalo(Tabuleiro tab, Cor cor) : base(tab, cor)
+        #region "Construtor"
+        /// <summary>
+        /// Create new piece Cavalo
+        /// </summary>
+        /// <param name="board">Board game</param>
+        /// <param name="colorPiece">color piece</param>
+        public Cavalo(Tabuleiro board, Cor colorPiece) : base(board, colorPiece)
         {
         }
+        #endregion
 
+        #region "Override To String"
         public override string ToString()
         {
             return PECA_CAVALO;
         }
+        #endregion
 
-        private bool podeMover(Posicao posicao)
+        #region "Movimentos Possiveis"
+        /// <summary>
+        /// Check if has piece in position
+        /// </summary>
+        /// <param name="position">position that valid</param>
+        /// <returns>true if is valid</returns>
+        private bool CanMove(Posicao position)
         {
-            Peca peca = Tabuleiro.Peca(posicao);
-            return peca == null || peca.Cor != Cor;
+            Peca piece = Board.GetPiece(position);
+            return piece == null || piece.Color != Color;
         }
 
-        public override bool[,] MovimentosPossiveis()
+        public override bool[,] PossibleMove()
         {
-            bool[,] mMovimentosPossiveis = new bool[Tabuleiro.Linhas, Tabuleiro.Colunas];
-            Posicao posicao = new Posicao(0, 0);
+            bool[,] mPossibleMove = new bool[Board.Line, Board.Column];
+            Posicao position = new Posicao(0, 0);
 
-            posicao.DefinirValores(Posicao.Linha - 1, Posicao.Coluna -2);
-            PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
+            position.SetValue(Position.Line - 1, Position.Column -2);
+            PositionIsPossible(ref mPossibleMove, position);
 
-            posicao.DefinirValores(Posicao.Linha - 2, Posicao.Coluna - 1);
-            PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
+            position.SetValue(Position.Line - 2, Position.Column - 1);
+            PositionIsPossible(ref mPossibleMove, position);
 
-            posicao.DefinirValores(Posicao.Linha - 2, Posicao.Coluna + 1);
-            PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
+            position.SetValue(Position.Line - 2, Position.Column + 1);
+            PositionIsPossible(ref mPossibleMove, position);
 
-            posicao.DefinirValores(Posicao.Linha - 1, Posicao.Coluna + 2);
-            PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
+            position.SetValue(Position.Line - 1, Position.Column + 2);
+            PositionIsPossible(ref mPossibleMove, position);
 
-            posicao.DefinirValores(Posicao.Linha + 1, Posicao.Coluna + 2);
-            PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
+            position.SetValue(Position.Line + 1, Position.Column + 2);
+            PositionIsPossible(ref mPossibleMove, position);
 
-            posicao.DefinirValores(Posicao.Linha + 2, Posicao.Coluna + 1);
-            PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
+            position.SetValue(Position.Line + 2, Position.Column + 1);
+            PositionIsPossible(ref mPossibleMove, position);
 
-            posicao.DefinirValores(Posicao.Linha + 2, Posicao.Coluna - 1);
-            PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
+            position.SetValue(Position.Line + 2, Position.Column - 1);
+            PositionIsPossible(ref mPossibleMove, position);
 
-            posicao.DefinirValores(Posicao.Linha + 1, Posicao.Coluna - 2);
-            PosicoesPossiveis(ref mMovimentosPossiveis, posicao);
+            position.SetValue(Position.Line + 1, Position.Column - 2);
+            PositionIsPossible(ref mPossibleMove, position);
 
-            return mMovimentosPossiveis;
+            return mPossibleMove;
         }
 
-        private void PosicoesPossiveis(ref bool[,] mMovimentos, Posicao posicao)
+        private void PositionIsPossible(ref bool[,] mMovimentos, Posicao position)
         {
-            if (!Tabuleiro.PosicaoValida(posicao) && podeMover(posicao))
-                mMovimentos[Posicao.Linha, posicao.Coluna] = true;
+            if (Board.PositionIsValid(position) && CanMove(position))
+                mMovimentos[position.Line, position.Column] = true;
         }
+        #endregion
     }
 }

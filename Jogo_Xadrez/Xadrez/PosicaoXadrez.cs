@@ -1,27 +1,39 @@
-﻿using System;
-using tabuleiro;
+﻿using tabuleiro;
 
 namespace Xadrez
 {
     class PosicaoXadrez
     {
-        public char coluna { get; set; }
-        public int linha { get; set; }
+        #region "Variaveis"
+        public char Column { get; set; }
+        public int Line    { get; set; }
+        #endregion
 
-        public PosicaoXadrez(char coluna, int linha)
+        #region "Construtor"
+        public PosicaoXadrez(char column, int line)
         {
-            this.coluna = coluna;
-            this.linha = linha;
+            this.Column = column;
+            this.Line   = line;
         }
+        #endregion
 
-        public Posicao GetPosicao()
+        #region "posicao xadrez"
+        /// <summary>
+        /// Get Position of board
+        /// </summary>
+        /// <returns>Position of board</returns>
+        public Posicao GetPosition()
         {
-            return new Posicao(8 - linha, coluna - 'A');
+            return new Posicao(8 - Line, Column - 'A');
         }
+        #endregion
 
+        #region "Override ToString"
         public override string ToString()
         {
-            return "" + coluna + linha; 
+            return "" + Column + Line; 
         }
+        #endregion
+    
     }
 }

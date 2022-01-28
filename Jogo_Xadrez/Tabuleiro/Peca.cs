@@ -1,46 +1,79 @@
-﻿using System;
-using tabuleiro;
-
-namespace tabuleiro
+﻿namespace tabuleiro
 {
     abstract class Peca
     {
+        #region "Constantes"
         public const string PECA_BISPO  = "B ";
         public const string PECA_CAVALO = "C ";
         public const string PECA_DAMA   = "D ";
         public const string PECA_REI    = "R ";
         public const string PECA_TORRE  = "T ";
         public const string PECA_PEAO   = "P ";
+        #endregion
 
-        public Posicao Posicao     { get; set; }
-        public Cor Cor             { get; protected set; }
-        public int QtdMovimentos   { get; protected set; }
-        public Tabuleiro Tabuleiro { get; protected set; }
+        #region "Variaveis"
+        /// <summary>
+        /// position of piece
+        /// </summary>
+        public Posicao Position { get; set; }
+       /// <summary>
+       /// Color of piece
+       /// </summary>
+        public Cor Color        { get; protected set; }
+        /// <summary>
+        /// Amount move pieces
+        /// </summary>
+        public int AmountMoves  { get; protected set; }
+        /// <summary>
+        /// board of game
+        /// </summary>
+        public Tabuleiro Board  { get; protected set; }
+        #endregion
 
-        public Peca(Tabuleiro tabuleiro, Cor cor)
+        #region "Construtor"
+        /// <summary>
+        /// Constructor Piece
+        /// </summary>
+        /// <param name="board">board game</param>
+        /// <param name="color"> color piece</param>
+        protected Peca(Tabuleiro board, Cor colorPiece)
         {
-            this.Posicao       = null;
-            this.Tabuleiro     = tabuleiro;
-            this.Cor           = cor;
-            this.QtdMovimentos = 0;
+            this.Position    = null;
+            this.Board       = board;
+            this.Color       = colorPiece;
+            this.AmountMoves = 0;
+        }
+        #endregion
+
+        #region "Count Turn Game"
+        /// <summary>
+        /// Sum amount moves of game
+        /// </summary>
+        public void IncrementAmountMoves()
+        {
+            AmountMoves++;
         }
 
-        public void IncrementarQtdMovimentos()
+        /// <summary>
+        /// Decrease amount moves of game
+        /// </summary>
+        public void DecreaseAmountMoves()
         {
-            QtdMovimentos++;
+            AmountMoves--;
         }
+        #endregion
 
-        public void DecrementarQtdMovimentos()
+        #region "Possible Move"
+        /// <summary>
+        /// check possible moves of piece
+        /// </summary>
+        /// <returns>Possible moves of piece</returns>
+        public bool HasPossibleMoves()
         {
-            QtdMovimentos--;
-        }
-
-        public bool ExisteMovimentosPossiveis()
-        {
-            bool[,] mMovimentosPossiveis = MovimentosPossiveis();
-            for (int linha = 0; linha < Tabuleiro.Linhas; linha++)
+            bool[,] mMovimentosPossiveis = PossibleMove();
+            for (int linha = 0; linha < Board.Line; linha++)
             {
-                for (int coluna = 0; coluna < Tabuleiro.Colunas; coluna++)
+                for (int coluna = 0; coluna < Board.Column; coluna++)
                 {
                     if (mMovimentosPossiveis[linha, coluna])
                        return true;
@@ -49,13 +82,21 @@ namespace tabuleiro
             return false;
         }
 
-        public bool MovimentoPossivel(Posicao pos)
+        /// <summary>
+        /// Check if position has possible move
+        /// </summary>
+        /// <param name="posicao">position of test</param>
+        /// <returns>true if has possivle move in position</returns>
+        public bool MoveIsPossble(Posicao posicao)
         {
-            return MovimentosPossiveis()[pos.Linha, pos.Coluna];
+            return PossibleMove()[posicao.Line, posicao.Column];
         }
 
-        public abstract bool[,] MovimentosPossiveis();
+        /// <summary>
+        /// Abstract Method to get possible moves
+        /// </summary>
+        /// <returns>possible Moves of pieces</returns>
+        public abstract bool[,] PossibleMove();
+        #endregion
     }
-
-    
 }
